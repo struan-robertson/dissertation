@@ -1,0 +1,89 @@
+#+title: Terrain Model Processing with Machine Learning
+#+AUTHOR: Struan Robertson @@latex:\\@@ BSc (Hons) Applied Computing
+#+DATE: May 2023
+# +BIBILOGRAPHY: library.bib
+#+OPTIONS: toc:nil
+#+LaTeX_CLASS: article
+#+LaTeX_CLASS_OPTIONS: [twocolumn]
+# Styles
+
+# Basic Packages
+#+LaTeX_HEADER: \usepackage{balance}
+#+LaTeX_HEADER: \usepackage{graphics}
+#+LaTeX_HEADER: \usepackage{txfonts}
+#+LaTeX_HEADER: \usepackage{times}
+#+LaTeX_HEADER: \usepackage{color}
+#+LaTeX_HEADER: \usepackage{textcomp}
+#+LaTeX_HEADER: \usepackage{booktabs}
+#+LaTeX_HEADER: \usepackage{todonotes}
+#+LaTeX_HEADER: \usepackage{float}
+#+LaTeX_HEADER: \usepackage{url}
+#+LaTeX_HEADER: \usepackage{titling}
+#+LaTeX_HEADER: \usepackage[pdftex]{hyperref}
+
+# Font sizess
+#+LaTeX_HEADER: \usepackage{sectsty}
+#+LaTeX_HEADER: \sectionfont{\Large}
+#+LaTeX_HEADER: \subsectionfont{\large}
+#+LaTeX_HEADER: \subsubsectionfont{\large}
+#+LaTeX_HEADER: \paragraphfont{\normalsize}
+
+# Positioning
+#+LaTeX_HEADER: \setlength{\parindent}{0em}
+#+LaTeX_HEADER: \setlength{\parskip}{1em}
+#+LaTeX_HEADER: \setlength{\columnsep}{2em}
+#+LaTeX_HEADER: \setlength{\droptitle}{-10em}
+
+# Define global style for URLs
+#+LaTeX_HEADER: \makeatletter
+#+LaTeX_HEADER: \def\url@leostyle{%
+#+LaTeX_HEADER:     \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\bf\ttfamily}}}
+#+LaTeX_HEADER: \makeatother
+#+LaTeX_HEADER: \urlstyle{leo}
+
+#+LATEX: \begin{abstract}
+
+You cannot use an org-mode header here.
+If you do, it trashes the table of contents for the apa6 document class.
+That's why Abstract is bolded manually.
+
+As you can see, I write my documents 1 sentence to a line.
+This is because I keep these documents under version control.
+A single English sentence is similar to a single line of code.
+You wouldn't run lines of code together in a production codebase, so don't run sentences together in a VC'ed text document.
+
+Latex and org-mode both interpret a single empty line as a paragraph break, so the fact that your source document is 1 sentence per line will not be visible to anybody other than you.
+
+#+LATEX: \end{abstract}
+
+* Introduction
+
+This section should introduce the project.
+It should include an explanation of the problem and the objectives of the project.
+It is very important to give a clear description of what the project is actually intended to do, preferably in non-technical terms.
+The report as a whole should include a clear description of the lifecycle stages undertaken and must describe the use of appropriate tools to support the development process.
+It should give a full and accurate description of the work done and achievements made, together with complete software documentation.
+Every effort should be made to provide a professional, quality description of the work.
+Proofread carefully for grammatical, spelling and punctuation errors or inconsistencies BBC.
+The report should be formatted as a justified, double-column, single-spaced, 10pt Times New Roman font document using an appropriate word processing system such as Microsoft Word, OpenOffice Writer or LaTeX and converted to a PDF file.
+The length of the report is likely to depend, for example, on the number of images included.
+As a guide, you should aim for about 20 pages, with 15 pages regarded as a lower limit and 35 as an upper limit.
+What is required is quality rather than quantity.
+The general layout of the report should follow this example document although the number of sections and their headings will vary from project to project.
+The report should be written in a formal style: it is neither a diary nor a magazine article.
+All pages should be numbered.
+All references should be cited in the main body of the report and a standard referencing format (such as IEEE or Harvard style) should be adopted Wilde.
+The report should demonstrate that the student has used appropriate tools to support the development process and that verification and validation have been applied at all stages.
+
+
+** First Subsection
+
+The subsections can hold various information.
+Use subsections to break up your document and make it easier to read.
+
+You can include lists with bullet points:
+- /Item 1/
+- *Item 2*
+- Item 3
+- Item 4
+- Item 5
