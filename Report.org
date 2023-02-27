@@ -84,6 +84,8 @@ Use subsections to break up your document and make it easier to read.
 You can include lists with bullet points:
 - /Item 1/
 - *Item 2*
+  * The quick brown fox jumps over the lazy dog
+  * TTT
 - Item 3
 - Item 4
 - Item 5
