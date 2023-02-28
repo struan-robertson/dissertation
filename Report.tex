@@ -1,4 +1,4 @@
-% Created 2023-02-28 Tue 12:24
+% Created 2023-02-28 Tue 17:01
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -48,6 +48,8 @@
  pdfsubject={},
  pdfcreator={Emacs 28.2 (Org mode 9.6.1)}, 
  pdflang={English}}
+\usepackage{biblatex}
+
 \begin{document}
 
 \maketitle
@@ -55,15 +57,15 @@
 
 With the launch of the lunar orbiter laser altimeter (LOLA) on NASA's lunar reconnaissance orbiter (LRO), a large amount of high-resolution digital elevation maps (DEMs) have been constructed, providing a precise topographical model of the moons surface.
 These DEMs are prone to voids containing no data, making the map less reliable for scientific purposes and future moon missions.
-This project aims to use a machine learning model to allow for the technique of image inpainting to be used with lunar DEMs.
+This paper uses a machine learning model to allow for the technique of image inpainting to be used with lunar DEMs.
 Image inpainting uses pixel data from an image to generate missing data to fill a void.
 DEMs can be thought of mathematically as identical to a single channel (greyscale) image, a two-dimensional array with ``pixel'' values corresponding to height, and so the technique of image inpainting can be easily applied to DEMs.
-A Generative Adversarial Network (GAN) based on a fully convolutional architecture will be used for the inpainting.
+A Generative Adversarial Network (GAN) based on a fully convolutional architecture was used for the inpainting.
 
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org3234048}
+\label{sec:org03d8884}
 
 This section should introduce the project.
 It should include an explanation of the problem and the objectives of the project.
@@ -80,25 +82,17 @@ The general layout of the report should follow this example document although th
 The report should be written in a formal style: it is neither a diary nor a magazine article.
 All pages should be numbered.
 All references should be cited in the main body of the report and a standard referencing format (such as IEEE or Harvard style) should be adopted Wilde.
-The report should demonstrate that the student has used appropriate tools to support the development process and that verification and validation have been applied at all stages.
+The report should demonstrate that the student has used appropriate tools to support the development process and that verification and validation have been applied at all stages
 
+\subsection{Export Tests}
+\label{sec:org40777bf}
 
-\subsection{First Subsection}
-\label{sec:org03359d1}
+\textbf{Bold}
+\emph{Italics}
+\texttt{Mono}
+\texttt{Code}
+\uline{Underline}
+\sout{Crossed}
 
-The subsections can hold various information.
-Use subsections to break up your document and make it easier to read.
-
-You can include lists with bullet points:
-\begin{itemize}
-\item \emph{Item 1}
-\item \textbf{Item 2}
-\begin{itemize}
-\item The quick brown fox jumps over the lazy dog
-\item TTT
-\end{itemize}
-\item Item 3
-\item Item 4
-\item Item 5
-\end{itemize}
+Test 123
 \end{document}
