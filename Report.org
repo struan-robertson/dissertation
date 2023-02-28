@@ -1,7 +1,7 @@
 #+title: Terrain Model Processing with Machine Learning
 #+AUTHOR: Struan Robertson @@latex:\\@@ BSc (Hons) Applied Computing
 #+DATE: May 2023
-# +BIBILOGRAPHY: library.bib
+#+BIBILOGRAPHY: library.bib
 #+OPTIONS: toc:nil
 #+LaTeX_CLASS: article
 #+LaTeX_CLASS_OPTIONS: [twocolumn]
