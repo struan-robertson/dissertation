@@ -1,8 +1,10 @@
 #+title: Terrain Model Processing with Machine Learning
 #+AUTHOR: Struan Robertson @@latex:\\@@ BSc (Hons) Applied Computing
 #+DATE: May 2023
-#+BIBILOGRAPHY: library.bib
+#+BIBLIOGRAPHY: library.bib
 #+OPTIONS: toc:nil
+#+cite_export: biblatex
+
 #+LaTeX_CLASS: article
 #+LaTeX_CLASS_OPTIONS: [twocolumn]
 # Styles
@@ -55,6 +57,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 * Introduction
 
 This section should introduce the project.
+Citation: [cite:@wengGANWGAN2019]
 It should include an explanation of the problem and the objectives of the project.
 It is very important to give a clear description of what the project is actually intended to do, preferably in non-technical terms.
 The report as a whole should include a clear description of the lifecycle stages undertaken and must describe the use of appropriate tools to support the development process.
@@ -88,3 +91,5 @@ You can include lists with bullet points:
 - *Item 2*
 - Item 3
 - Item 4
+
+#+PRINT_BIBLIOGRAPHY:
