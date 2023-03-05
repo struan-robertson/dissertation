@@ -23,7 +23,7 @@
 #+LaTeX_HEADER: \usepackage{titling}
 #+LaTeX_HEADER: \usepackage[pdftex]{hyperref}
 
-# Font sizess
+# Font sizes
 #+LaTeX_HEADER: \usepackage{sectsty}
 #+LaTeX_HEADER: \sectionfont{\Large}
 #+LaTeX_HEADER: \subsectionfont{\large}
@@ -52,6 +52,7 @@ Image inpainting uses pixel data from an image to generate missing data to fill 
 DEMs can be thought of mathematically as identical to a single channel (greyscale) image, a two-dimensional array with "pixel" values corresponding to height, and so the technique of image inpainting can be easily applied to DEMs.
 A Generative Adversarial Network (GAN) based on a fully convolutional architecture was used for the inpainting.
 
+
 #+LATEX: \end{abstract}
 
 * Introduction
@@ -60,7 +61,7 @@ This section should introduce the project.
 Citation: [cite:@wengGANWGAN2019]
 It should include an explanation of the problem and the objectives of the project.
 It is very important to give a clear description of what the project is actually intended to do, preferably in non-technical terms.
-The report as a whole should include a clear description of the lifecycle stages undertaken and must describe the use of appropriate tools to support the development process.
+The report as a whole should include a clear description of the life-cycle stages undertaken and must describe the use of appropriate tools to support the development process.
 It should give a full and accurate description of the work done and achievements made, together with complete software documentation.
 Every effort should be made to provide a professional, quality description of the work.
 Proofread carefully for grammatical, spelling and punctuation errors or inconsistencies BBC.
