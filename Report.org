@@ -3,6 +3,7 @@
 #+DATE: May 2023
 #+BIBLIOGRAPHY: library.bib
 #+OPTIONS: toc:nil
+#+LANGUAGE: en-gb
 #+cite_export: biblatex
 
 #+LaTeX_CLASS: article
@@ -22,8 +23,9 @@
 #+LaTeX_HEADER: \usepackage{url}
 #+LaTeX_HEADER: \usepackage{titling}
 #+LaTeX_HEADER: \usepackage[pdftex]{hyperref}
+#+LaTeX_HEADER: \usepackage[british]{babel}
 
-# Font sizess
+# Font sizes
 #+LaTeX_HEADER: \usepackage{sectsty}
 #+LaTeX_HEADER: \sectionfont{\Large}
 #+LaTeX_HEADER: \subsectionfont{\large}
