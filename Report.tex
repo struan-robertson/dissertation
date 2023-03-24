@@ -1,4 +1,4 @@
-% Created 2023-03-24 Fri 17:49
+% Created 2023-03-24 Fri 18:23
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -68,7 +68,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org655e49c}
+\label{sec:orgeec5de1}
 
 Requirements:
 \begin{itemize}
@@ -88,5 +88,9 @@ LOLA DEMs are also prone to no-data voids in regions where topographical feature
 
 Reconstructing no-data voids in Lunar DEMs is non-trivial due to the challenging requirements: 1) high resolution DEMs require high-resolution reconstruction methodology, 2) reconstruction algorithm must be reliable since it can affect related lunar studies or exploration missions, and 3) LOLA DEM is a large and high-resolution area map, thus a scalable approach should be applied.\autocite{parkNeuralProcessApproach2021}.
 Accordingly, this paper aims to develop a deep learning approach to robustly and accurately infer no-data voids whilst maintaining the same resolution of the input DEM.
+
+Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighboring elevation values for void infilling, thus performance is directly related to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  \autocite{reuterEvaluationVoidFilling2007}
+
+Image inpainting
 \printbibliography
 \end{document}
