@@ -70,8 +70,9 @@ Topographical data from LOLA will be used to facilitate the selection of future 
 [cite:@chinLunarReconnaissanceOrbiter2007]
 
 The LRO is in a polar orbit around the moon, with LOLA scanning the surface in swathes 50 to 60m wide, with an average separation ranging between 1.2km and 200m depending on the position of LRO in orbit.[cite:@smithLunarOrbiterLaser2010].
-To construct a complete DEM from these swathes, they must be combined, which often results in artefacts from the blending method used.
+To construct a complete DEM from these swathes they must be combined, requiring blending between swatches (with potential separation), resulting in artefacts and non-accurate data.
 LOLA DEMs are also prone to no-data voids in regions where topographical features block reflection of the laser to LOLA, such as deep craters.
 
-
+Reconstructing no-data voids in Lunar DEMs is non-trivial due to the challenging requirements: 1) high resolution DEMs require high-resolution reconstruction methodology, 2) reconstruction algorithm must be reliable since it can affect related lunar studies or exploration missions, and 3) LOLA DEM is a large and high-resolution area map, thus a scalable approach should be applied.[cite:@parkNeuralProcessApproach2021].
+Accordingly, this paper aims to develop a deep learning approach to robustly and accurately infer no-data voids whilst maintaining the same resolution of the input DEM.
 #+PRINT_BIBLIOGRAPHY:
