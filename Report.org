@@ -58,40 +58,19 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 
 * Introduction
 
-This section should introduce the project.
-Citation: [cite:@wengGANWGAN2019]
-It should include an explanation of the problem and the objectives of the project.
-It is very important to give a clear description of what the project is actually intended to do, preferably in non-technical terms.
-The report as a whole should include a clear description of the lifecycle stages undertaken and must describe the use of appropriate tools to support the development process.
-It should give a full and accurate description of the work done and achievements made, together with complete software documentation.
-Every effort should be made to provide a professional, quality description of the work.
-Proofread carefully for grammatical, spelling and punctuation errors or inconsistencies BBC.
-The report should be formatted as a justified, double-column, single-spaced, 10pt Times New Roman font document using an appropriate word processing system such as Microsoft Word, OpenOffice Writer or LaTeX and converted to a PDF file.
-The length of the report is likely to depend, for example, on the number of images included.
-As a guide, you should aim for about 20 pages, with 15 pages regarded as a lower limit and 35 as an upper limit.
-What is required is quality rather than quantity.
-The general layout of the report should follow this example document although the number of sections and their headings will vary from project to project.
-The report should be written in a formal style: it is neither a diary nor a magazine article.
-All pages should be numbered.
-All references should be cited in the main body of the report and a standard referencing format (such as IEEE or Harvard style) should be adopted Wilde.
-The report should demonstrate that the student has used appropriate tools to support the development process and that verification and validation have been applied at all stages
+Requirements:
+ - Explanation of the problem
+ - Background context
+ - Objectives of the project
 
-** Export Tests
+Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) has been used for the construction of Lunar digital elevation models (DEMs) since its launch upon the Lunar Reconnaissance Orbiter in 2009.
+LOLA has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
+Topographical data from LOLA will be used to facilitate the selection of future landing sites, so accuracy and completeness are essential.
+[cite:@chinLunarReconnaissanceOrbiter2007]
 
-*Bold*
-/Italics/
-=Mono=
-~Code~
-_Underline_
-+Crossed+
+The LRO is in a polar orbit around the moon, with LOLA scanning the surface in swathes 50 to 60m wide, with an average separation ranging between 1.2km and 200m depending on the position of LRO in orbit.[cite:@smithLunarOrbiterLaser2010].
+To construct a complete DEM from these swathes, they must be combined, which often results in artefacts from the blending method used.
+LOLA DEMs are also prone to no-data voids in regions where topographical features block reflection of the laser to LOLA, such as deep craters.
 
-The subsections can hold various information.
-Use subsections to break up your document and make it easier to read.
-
-You can include lists with bullet points:
-- /Item 1/
-- *Item 2*
-- Item 3
-- Item 4
 
 #+PRINT_BIBLIOGRAPHY:
