@@ -54,6 +54,7 @@ Image inpainting uses pixel data from an image to generate missing data to fill 
 DEMs can be thought of mathematically as identical to a single channel (greyscale) image, a two-dimensional array with "pixel" values corresponding to height, and so the technique of image inpainting can be easily applied to DEMs.
 A Generative Adversarial Network (GAN) based on a fully convolutional architecture was used for the inpainting.
 
+
 #+LATEX: \end{abstract}
 
 * Introduction
