@@ -1,4 +1,4 @@
-% Created 2023-03-24 Fri 18:23
+% Created 2023-04-07 Fri 19:27
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -50,7 +50,7 @@
  pdfcreator={Emacs 28.2 (Org mode 9.6.1)}, 
  pdflang={English}}
 \usepackage{biblatex}
-\addbibresource{/home/struan/Dissertation/Report/library.bib}
+\addbibresource{/home/struan/Documents/University/Dissertation/library.bib}
 \addbibresource{/home/struan/Sync/library.bib}
 \begin{document}
 
@@ -68,28 +68,28 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:orgeec5de1}
+\label{sec:org8522791}
 
-Requirements:
-\begin{itemize}
-\item Explanation of the problem
-\item Background context
-\item Objectives of the project
-\end{itemize}
-
-Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) has been used for the construction of Lunar digital elevation models (DEMs) since its launch upon the Lunar Reconnaissance Orbiter in 2009.
-LOLA has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
-Topographical data from LOLA will be used to facilitate the selection of future landing sites, so accuracy and completeness are essential.
+Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
+LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
+Topographical data from LOLA and LROC will be used to facilitate the selection of future landing sites, so accuracy and completeness are essential.
 \autocite{chinLunarReconnaissanceOrbiter2007}
 
-The LRO is in a polar orbit around the moon, with LOLA scanning the surface in swathes 50 to 60m wide, with an average separation ranging between 1.2km and 200m depending on the position of LRO in orbit.\autocite{smithLunarOrbiterLaser2010}.
-To construct a complete DEM from these swathes they must be combined, requiring blending between swatches (with potential separation), resulting in artefacts and non-accurate data.
-LOLA DEMs are also prone to no-data voids in regions where topographical features block reflection of the laser to LOLA, such as deep craters.
+The LRO is in a polar orbit around the moon, scanning the surface in swathes 50 to 60m wide, with an average separation ranging between 1.2km and 200m depending on the position of LRO in orbit.
+LOLA uses a laser altimeter to measure the distance from LRO to the lunar surface at 5 different spots simultaneously, providing DEMs ranging from \textasciitilde{}30m resolution at the equator to \textasciitilde{}5m resolution at the poles. \autocite{smithLunarOrbiterLaser2010}.
+LROC uses two narrow-angle cameras (NACs) to collect stereo observations at a resolution of 0.5 to 1.5 m per pixel.
+These high resolution images can be used to generate high resolution (\textasciitilde{}5m at the equator) DEMS, referred to as NAC DEMs \autocite{tranGENERATINGDIGITALTERRAIN2010}.
 
-Reconstructing no-data voids in Lunar DEMs is non-trivial due to the challenging requirements: 1) high resolution DEMs require high-resolution reconstruction methodology, 2) reconstruction algorithm must be reliable since it can affect related lunar studies or exploration missions, and 3) LOLA DEM is a large and high-resolution area map, thus a scalable approach should be applied.\autocite{parkNeuralProcessApproach2021}.
-Accordingly, this paper aims to develop a deep learning approach to robustly and accurately infer no-data voids whilst maintaining the same resolution of the input DEM.
+Both LOLA and NAC dems are prone to no-data voids resulting from shadowed regions (NAC) or terrain features blocking the return of the laser altimeter (LOLA).
+As the LRO has a polar orbit, data is recorded in strips, which must be joined together to create larger DEMs. These strips are not immediately adjacent to each other, resulting in a no-data void between strips.
+Reconstructing these no-data voids is non-trivial, with Park and Choi \autocite{parkNeuralProcessApproach2021}  noting the following challenges:
+\begin{itemize}
+\item NAC DEMs require high-resolution reconstruction methodology
+\item The reconstruction algorithm must be reliable since it can affect related lunar studies or exploration missions
+\item NAC DEMs are large and high-resolution area maps, thus a scalable approach should be applied
+\end{itemize}
 
-Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighboring elevation values for void infilling, thus performance is directly related to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  \autocite{reuterEvaluationVoidFilling2007}
+Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighboring elevation values for void infilling, thus performance is directly proportional to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  \autocite{reuterEvaluationVoidFilling2007}
 
 Image inpainting
 \printbibliography
