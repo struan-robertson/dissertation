@@ -1,4 +1,4 @@
-% Created 2023-04-07 Fri 19:27
+% Created 2023-04-09 Sun 23:44
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -39,6 +39,15 @@
 \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\bf\ttfamily}}}
 \makeatother
 \urlstyle{leo}
+\usepackage[
+%backend=biber,
+natbib=true,
+style=numeric,
+sorting=none
+]{biblatex}
+\addbibresource{/home/struan/Dissertation/Report/library.bib}
+\addbibresource{/home/struan/Sync/library.bib}
+\bibliographystyle{ACM-Reference-Format}
 \author{Struan Robertson \\ BSc (Hons) Applied Computing}
 \date{May 2023}
 \title{Terrain Model Processing with Machine Learning}
@@ -49,9 +58,6 @@
  pdfsubject={},
  pdfcreator={Emacs 28.2 (Org mode 9.6.1)}, 
  pdflang={English}}
-\usepackage{biblatex}
-\addbibresource{/home/struan/Documents/University/Dissertation/library.bib}
-\addbibresource{/home/struan/Sync/library.bib}
 \begin{document}
 
 \maketitle
@@ -68,7 +74,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org8522791}
+\label{sec:org0345d6f}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -78,7 +84,7 @@ Topographical data from LOLA and LROC will be used to facilitate the selection o
 The LRO is in a polar orbit around the moon, scanning the surface in swathes 50 to 60m wide, with an average separation ranging between 1.2km and 200m depending on the position of LRO in orbit.
 LOLA uses a laser altimeter to measure the distance from LRO to the lunar surface at 5 different spots simultaneously, providing DEMs ranging from \textasciitilde{}30m resolution at the equator to \textasciitilde{}5m resolution at the poles. \autocite{smithLunarOrbiterLaser2010}.
 LROC uses two narrow-angle cameras (NACs) to collect stereo observations at a resolution of 0.5 to 1.5 m per pixel.
-These high resolution images can be used to generate high resolution (\textasciitilde{}5m at the equator) DEMS, referred to as NAC DEMs \autocite{tranGENERATINGDIGITALTERRAIN2010}.
+These high resolution images can be used to generate high resolution (\textasciitilde{}5m at the equator) DEMS, referred to as NAC DEMs \autocite{tranGeneratingDigitalTerrain2010}.
 
 Both LOLA and NAC dems are prone to no-data voids resulting from shadowed regions (NAC) or terrain features blocking the return of the laser altimeter (LOLA).
 As the LRO has a polar orbit, data is recorded in strips, which must be joined together to create larger DEMs. These strips are not immediately adjacent to each other, resulting in a no-data void between strips.
@@ -92,5 +98,12 @@ Reconstructing these no-data voids is non-trivial, with Park and Choi \autocite{
 Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighboring elevation values for void infilling, thus performance is directly proportional to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  \autocite{reuterEvaluationVoidFilling2007}
 
 Image inpainting
+
+\section*{Acknowledgements}
+Test Ack
+
 \printbibliography
+
+\section*{Appendices}
+Test App
 \end{document}

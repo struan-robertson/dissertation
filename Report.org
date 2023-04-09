@@ -45,6 +45,15 @@
 #+LaTeX_HEADER: \makeatother
 #+LaTeX_HEADER: \urlstyle{leo}
 
+#+LaTeX_HEADER: \usepackage[
+#+LaTeX_HEADER:    %backend=biber,
+#+LaTeX_HEADER:    natbib=true,
+#+LaTeX_HEADER:    style=numeric,
+#+LaTeX_HEADER:    sorting=none
+#+LaTeX_HEADER: ]{biblatex}
+
+#+LaTeX_HEADER:\bibliographystyle{ACM-Reference-Format}
+
 #+LATEX: \begin{abstract}
 
 With the launch of the lunar orbiter laser altimeter (LOLA) on NASA's lunar reconnaissance orbiter (LRO), a large amount of high-resolution digital elevation maps (DEMs) have been constructed, providing a precise topographical model of the moons surface.
@@ -67,7 +76,7 @@ Topographical data from LOLA and LROC will be used to facilitate the selection o
 The LRO is in a polar orbit around the moon, scanning the surface in swathes 50 to 60m wide, with an average separation ranging between 1.2km and 200m depending on the position of LRO in orbit.
 LOLA uses a laser altimeter to measure the distance from LRO to the lunar surface at 5 different spots simultaneously, providing DEMs ranging from ~30m resolution at the equator to ~5m resolution at the poles. [cite:@smithLunarOrbiterLaser2010].
 LROC uses two narrow-angle cameras (NACs) to collect stereo observations at a resolution of 0.5 to 1.5 m per pixel.
-These high resolution images can be used to generate high resolution (~5m at the equator) DEMS, referred to as NAC DEMs [cite:@tranGENERATINGDIGITALTERRAIN2010].
+These high resolution images can be used to generate high resolution (~5m at the equator) DEMS, referred to as NAC DEMs [cite:@tranGeneratingDigitalTerrain2010].
 
 Both LOLA and NAC dems are prone to no-data voids resulting from shadowed regions (NAC) or terrain features blocking the return of the laser altimeter (LOLA).
 As the LRO has a polar orbit, data is recorded in strips, which must be joined together to create larger DEMs. These strips are not immediately adjacent to each other, resulting in a no-data void between strips.
@@ -79,4 +88,11 @@ Reconstructing these no-data voids is non-trivial, with Park and Choi [cite:@par
 Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighboring elevation values for void infilling, thus performance is directly proportional to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  [cite:@reuterEvaluationVoidFilling2007]
 
 Image inpainting
+
+#+LATEX: \section*{Acknowledgements}
+Test Ack
+
 #+PRINT_BIBLIOGRAPHY:
+
+#+LATEX: \section*{Appendices}
+Test App
