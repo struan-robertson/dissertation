@@ -89,10 +89,26 @@ Traditional algorithmic methods for correcting no-data voids within DEMs include
 
 Image inpainting
 
+* Background
+
+* Specification
+
+* Design
+
+* Implementation and Testing
+
+* Evaluation / Testing
+
+* Description of the final product
+
+* Appraisal
+
+* Summary and Conclusions
+
+* Future Work
+
 #+LATEX: \section*{Acknowledgements}
-Test Ack
 
 #+PRINT_BIBLIOGRAPHY:
 
 #+LATEX: \section*{Appendices}
-Test App
