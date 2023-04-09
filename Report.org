@@ -85,9 +85,17 @@ Reconstructing these no-data voids is non-trivial, with Park and Choi [cite:@par
  - The reconstruction algorithm must be reliable since it can affect related lunar studies or exploration missions
  - NAC DEMs are large and high-resolution area maps, thus a scalable approach should be applied
 
-Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighboring elevation values for void infilling, thus performance is directly proportional to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  [cite:@reuterEvaluationVoidFilling2007]
+Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighbouring elevation values for void infilling, thus performance is directly proportional to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  [cite:@reuterEvaluationVoidFilling2007]
 
-Image inpainting
+Image inpainting:
+ - Self supervised wasserstein GAN
+ - Very successful with images
+ - DEMs are very similar to images
+ - This is what is implemented in this paper
+ - Post-processing steps
+
+The problem of image inpainting within the field of computer vision fundamentally attempts to solve the same problem as DEM void infilling; DEMs are a 2 dimensional grid of elevation values, which can be thought of as the pixels in a greyscale images.
+Deep learning generational models have been shown to have excellent performance in image inpainting[cite:@pathakContextEncodersFeature2016;@yuGenerativeImageInpainting2018] and have been successfully applied with DEM void infilling[cite:@gavriilVoidFillingDigital2019;@zhangVoidFillingBased2020;@qiuVoidFillingDigital2019].
 
 * Background
 

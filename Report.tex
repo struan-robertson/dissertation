@@ -1,4 +1,4 @@
-% Created 2023-04-09 Sun 23:48
+% Created 2023-04-10 Mon 00:49
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -74,7 +74,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org73b2cae}
+\label{sec:orga360db1}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -95,36 +95,46 @@ Reconstructing these no-data voids is non-trivial, with Park and Choi \autocite{
 \item NAC DEMs are large and high-resolution area maps, thus a scalable approach should be applied
 \end{itemize}
 
-Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighboring elevation values for void infilling, thus performance is directly proportional to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  \autocite{reuterEvaluationVoidFilling2007}
+Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighbouring elevation values for void infilling, thus performance is directly proportional to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  \autocite{reuterEvaluationVoidFilling2007}
 
-Image inpainting
+Image inpainting:
+\begin{itemize}
+\item Self supervised wasserstein GAN
+\item Very successful with images
+\item DEMs are very similar to images
+\item This is what is implemented in this paper
+\item Post-processing steps
+\end{itemize}
+
+The problem of image inpainting within the field of computer vision fundamentally attempts to solve the same problem as DEM void infilling; DEMs are a 2 dimensional grid of elevation values, which can be thought of as the pixels in a greyscale images.
+Deep learning generational models have been shown to have excellent performance in image inpainting\autocite{pathakContextEncodersFeature2016,yuGenerativeImageInpainting2018} and have been successfully applied to DEM void infilling\autocite{gavriilVoidFillingDigital2019,zhangVoidFillingBased2020,qiuVoidFillingDigital2019}
 
 \section{Background}
-\label{sec:org793ce1e}
+\label{sec:org31beb77}
 
 \section{Specification}
-\label{sec:org452d78b}
+\label{sec:org752bf7a}
 
 \section{Design}
-\label{sec:org784e275}
+\label{sec:orgc4aca7b}
 
 \section{Implementation and Testing}
-\label{sec:org6d3bf0f}
+\label{sec:orgb791c77}
 
 \section{Evaluation / Testing}
-\label{sec:org99f219a}
+\label{sec:org3bcf2d5}
 
 \section{Description of the final product}
-\label{sec:orgf646521}
+\label{sec:org1714e1b}
 
 \section{Appraisal}
-\label{sec:org19136b5}
+\label{sec:org479c52f}
 
 \section{Summary and Conclusions}
-\label{sec:org98d1b65}
+\label{sec:orgdf659e2}
 
 \section{Future Work}
-\label{sec:org7442dd7}
+\label{sec:org29e0537}
 
 \section*{Acknowledgements}
 
