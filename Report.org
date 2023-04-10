@@ -79,23 +79,24 @@ LROC uses two narrow-angle cameras (NACs) to collect stereo observations at a re
 These high resolution images can be used to generate high resolution (~5m at the equator) DEMS, referred to as NAC DEMs [cite:@tranGeneratingDigitalTerrain2010].
 
 Both LOLA and NAC dems are prone to no-data voids resulting from shadowed regions (NAC) or terrain features blocking the return of the laser altimeter (LOLA).
-As the LRO has a polar orbit, data is recorded in strips, which must be joined together to create larger DEMs. These strips are not immediately adjacent to each other, resulting in a no-data void between strips.
+As the LRO has a polar orbit, data is recorded in strips, which must be joined together to create larger DEMs. These strips are not immediately adjacent to each other, resulting in a no-data void between.
 Reconstructing these no-data voids is non-trivial, with Park and Choi [cite:@parkNeuralProcessApproach2021]  noting the following challenges:
  - NAC DEMs require high-resolution reconstruction methodology
- - The reconstruction algorithm must be reliable since it can affect related lunar studies or exploration missions
  - NAC DEMs are large and high-resolution area maps, thus a scalable approach should be applied
+ - The reconstruction algorithm must be reliable since it can affect related lunar studies or exploration missions
 
-Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighbouring elevation values for void infilling, thus performance is directly proportional to the size of the void. Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  [cite:@reuterEvaluationVoidFilling2007]
+Traditional algorithmic methods for correcting no-data voids within DEMs include inverse distance weight method (IDW), local polynomial interpolation method (LPI), spline with tension method (ST) and other algorithms to interpolate the elevation sampling points. Interpolation methods use the neighboring elevation values for void infilling, thus performance is directly proportional to the size of the void.
+Voids of any significant size result in interpolation methods returning inaccurate reconstruction results.  [cite:@reuterEvaluationVoidFilling2007]
 
-Image inpainting:
- - Self supervised wasserstein GAN
- - Very successful with images
- - DEMs are very similar to images
- - This is what is implemented in this paper
- - Post-processing steps
+Within the field of computer vision, the problem of image inpainting fundamentally seeks to solve the same issue as DEM void infilling; a 2-dimensional grid of points with an area of no data which must be inferred from surrounding points.
+RGB images contain three channels whereas a DEM contains only one, however inpainting techniques process each channel independently and then combine the results, so inpainting a DEM is functionally identical to inpainting a greyscale image.
+Generative adversarial networks (GANs)[cite:@goodfellowGenerativeAdversarialNetworks2020] are a deep learning generative model that when constructed with deep convolutional neural networks[cite:@krizhevskyImageNetClassificationDeep2017] have been shown to have excellent performance in image inpainting[cite:@pathakContextEncodersFeature2016;@yuGenerativeImageInpainting2018] and have been successfully applied to the task of DEM void infilling[cite:@gavriilVoidFillingDigital2019;@zhangVoidFillingBased2020;@qiuVoidFillingDigital2019].
 
-The problem of image inpainting within the field of computer vision fundamentally attempts to solve the same problem as DEM void infilling; DEMs are a 2 dimensional grid of elevation values, which can be thought of as the pixels in a greyscale images.
-Deep learning generational models have been shown to have excellent performance in image inpainting[cite:@pathakContextEncodersFeature2016;@yuGenerativeImageInpainting2018] and have been successfully applied with DEM void infilling[cite:@gavriilVoidFillingDigital2019;@zhangVoidFillingBased2020;@qiuVoidFillingDigital2019].
+This papers implements a GAN inpainting network based on the structure described by Yu /et al./[cite:@yuGenerativeImageInpainting2018] and shows it to effectively pass the first two challenges set forward by Park and Choi[cite:@parkNeuralProcessApproach2021].
+The final challenge of DEM reliability may be passed by this network, however this is difficult to test as GANs excel at infilling /plausible/ data, yet the /accuracy/ of this data may not be necessarily sufficient.
+
+Due to the similarity with images, image processing techniques can be applied to the DEMs.
+In this paper, the technique of poisson seamless cloning[cite:@perezPoissonImageEditing2003] was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 * Background
 
