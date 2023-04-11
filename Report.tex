@@ -1,4 +1,4 @@
-% Created 2023-04-11 Tue 00:03
+% Created 2023-04-11 Tue 19:17
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -23,7 +23,6 @@
 \usepackage{float}
 \usepackage{url}
 \usepackage{titling}
-\usepackage[pdftex]{hyperref}
 \usepackage[british]{babel}
 \usepackage{sectsty}
 \sectionfont{\Large}
@@ -47,7 +46,6 @@ sorting=none
 ]{biblatex}
 \addbibresource{/home/struan/Documents/University/Dissertation/library.bib}
 \addbibresource{/home/struan/Sync/library.bib}
-\bibliographystyle{ACM-Reference-Format}
 \author{Struan Robertson \\ BSc (Hons) Applied Computing}
 \date{May 2023}
 \title{Terrain Model Processing with Machine Learning}
@@ -74,7 +72,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:orgaec2713}
+\label{sec:org39fa31c}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -87,7 +85,7 @@ LROC uses two narrow-angle cameras (NACs) to collect stereo observations at a re
 These high resolution images can be used to generate high resolution (\textasciitilde{}5m at the equator) DEMS, referred to as NAC DEMs \autocite{tranGeneratingDigitalTerrain2010}.
 
 Both LOLA and NAC dems are prone to no-data voids resulting from shadowed regions (NAC) or terrain features blocking the return of the laser altimeter (LOLA).
-As the LRO has a polar orbit, data is recorded in strips, which must be joined together to create larger DEMs. These strips are not immediately adjacent to each other, resulting in a no-data void between.
+As the LRO has a polar orbit, data is recorded in strips, which must be joined together to create larger DEMs. These strips are not immediately adjacent to each other, resulting in a no-data void in-between.
 Reconstructing these no-data voids is non-trivial, with Park and Choi \autocite{parkNeuralProcessApproach2021}  noting the following challenges:
 \begin{itemize}
 \item NAC DEMs require high-resolution reconstruction methodology
@@ -105,36 +103,97 @@ Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialN
 This papers implements a GAN inpainting network based on the structure described by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018} and shows it to effectively pass the first two challenges set forward by Park and Choi\autocite{parkNeuralProcessApproach2021}.
 The final challenge of DEM reliability may be passed by this network, however this is difficult to test as GANs excel at infilling \emph{plausible} data, yet the \emph{accuracy} of this data may not be necessarily sufficient.
 
-\#Test123
+\section{Background}
+\label{sec:org09b0cb5}
+\subsection{Digital Elevation Maps}
+\label{sec:orga4e2185}
+
+Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
+A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
+The cells of a DEM can also be described as pixels, as they represent a discrete location in a raster grid.
+DEM gridsize refers to the size of cells and can be thought of as the resolution of the DEM.
+Gridsize can vary depending on the source of data and the intended application, with common grid sizes ranging from a few meters to several kilometers.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{images/apollo_17.png}
+\caption{\label{fig:apollo_17}Shaded DEM of Apollo 17 landing site in Taurus-Littrow Valley}
+\end{figure}
+
+The slope of a DEM refers to the steepness of terrain at each location in the map (Figure \ref{fig:dem_and_slope}).
+Steepness in this context  is a measure of the change in elevation over a given distance, often expressed as a percentage or angle in degrees.
+Slope is calculated by traversing a 3 x 3 window (Figure \ref{fig:window}) over the DEM\autocite{qiuVoidFillingDigital2019}.
+The slope value at the central pixel \emph{e} can be calculated by using the algorithm proposed by Horn \emph{et al.}\autocite{hornHillShadingReflectance1981} :
+\begin{align}
+Slope &= arctan\sqrt{Slope^2_{we} + Slope^2_{sn}}, \\
+Slope_{we} &= \frac{(e_8 + 2e_1 + e_5) - (e_7 + 2e_3 + e_6)}{8 \times Gridsize}, \\
+Slope_{sn} &= \frac{(e_7 + 2e_4 + e_8) - (e_6 + 2e_2 + e_5)}{8 \times Gridsize},
+\end{align}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=4cm]{images/window.png}
+\caption{\label{fig:window}The 3x3 moving window\autocite{qiuVoidFillingDigital2019}}
+\end{figure}
+
+\begin{figure*}
+\centering
+\includegraphics[width=.9\linewidth]{images/dem_and_slope.png}
+\caption{\label{fig:dem_and_slope}Section of DEM with computed slope}
+\end{figure*}
+
+The most common data format for the storage of DEMs is GeoTiff.
+A GeoTiff is a type of TIFF (Tagged Image File Format) that with the raw DEM raster data also stores spatial metadata such as pixel resolution (gridsize).
+Lunar DEMs are also commonly stored in NASA's PDS (Planetary Data System) archival formats PDS3 and PDS4.
+PDS is used to archive multiple kinds of data from planetary science missions, not just DEMs.
+Older missions (pre 2011) are typically archived in PDS3, with post 2011 missions using PDS4.
+Although stored differently, the raster data in PDS files and GeoTiffs is identical.
+
+The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
+
+\subsection{Deep Neural Networks}
+\label{sec:org46397dd}
+
+Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological neurons.
+
+Biases are values associated
+Gradient descent and local minimum. - ball down a hill
+Batch size, effect of
+epoch
+
+\subsubsection{Convolutional Neural Networks}
+\label{sec:org26e1c0e}
+
+\subsubsection{Generative Adversarial Networks}
+\label{sec:orgc47db98}
+
+\subsection{Poisson Blending}
+\label{sec:org1ca822d}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
-\section{Background}
-\label{sec:org19a350a}
-
 \section{Specification}
-\label{sec:orgaa4ea34}
+\label{sec:orge600013}
 
 \section{Design}
-\label{sec:org7dfb7e7}
+\label{sec:org797f174}
 
 \section{Implementation and Testing}
-\label{sec:org43ab8b7}
+\label{sec:org0fe318e}
 
 \section{Evaluation / Testing}
-\label{sec:orge5ce328}
+\label{sec:orgc1bae6c}
 
 \section{Description of the final product}
-\label{sec:org043c5ad}
+\label{sec:org262eb7f}
 
 \section{Appraisal}
-\label{sec:org536f246}
+\label{sec:org3f4441f}
 
 \section{Summary and Conclusions}
-\label{sec:orgd540995}
+\label{sec:orgd6585ad}
 
 \section{Future Work}
-\label{sec:org3386713}
+\label{sec:orgfce9071}
 
 \section*{Acknowledgements}
 
