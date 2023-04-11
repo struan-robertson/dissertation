@@ -22,6 +22,7 @@
 #+LaTeX_HEADER: \usepackage{float}
 #+LaTeX_HEADER: \usepackage{url}
 #+LaTeX_HEADER: \usepackage{titling}
+#+LaTeX_HEADER: \usepackage[left=3cm,right=2cm,top=2.5cm,bottom=2cm]{geometry}
 #+LaTeX_HEADER: \usepackage[british]{babel}
 
 # Font sizes
@@ -35,7 +36,7 @@
 #+LaTeX_HEADER: \setlength{\parindent}{0em}
 #+LaTeX_HEADER: \setlength{\parskip}{1em}
 #+LaTeX_HEADER: \setlength{\columnsep}{2em}
-#+LaTeX_HEADER: \setlength{\droptitle}{-10em}
+#+LaTeX_HEADER: \setlength{\droptitle}{-5em}
 
 # Define global style for URLs
 #+LaTeX_HEADER: \makeatletter
@@ -100,12 +101,13 @@ A DEM consists of a grid of cells, where each cell represents a specific area of
 The cells of a DEM can also be described as pixels, as they represent a discrete location in a raster grid.
 DEM gridsize refers to the size of cells and can be thought of as the resolution of the DEM.
 Gridsize can vary depending on the source of data and the intended application, with common grid sizes ranging from a few meters to several kilometers.
+
 #+CAPTION: Shaded DEM of Apollo 17 landing site in Taurus-Littrow Valley
 #+NAME: fig:apollo_17
 [[file:images/apollo_17.png]]
 
 The slope of a DEM refers to the steepness of terrain at each location in the map (Figure [[fig:dem_and_slope]]).
-Steepness in this context  is a measure of the change in elevation over a given distance, often expressed as a percentage or angle in degrees.
+Steepness in this context is a measure of the change in elevation over a given distance, often expressed as a percentage or angle in degrees.
 Slope is calculated by traversing a 3 x 3 window (Figure [[fig:window]]) over the DEM[cite:@qiuVoidFillingDigital2019].
 The slope value at the central pixel /e/ can be calculated by using the algorithm proposed by Horn /et al./[cite:@hornHillShadingReflectance1981] :
 \begin{align}
@@ -121,7 +123,6 @@ Slope_{sn} &= \frac{(e_7 + 2e_4 + e_8) - (e_6 + 2e_2 + e_5)}{8 \times Gridsize},
 
 #+CAPTION: Section of DEM with computed slope
 #+NAME: fig:dem_and_slope
-#+ATTR_LATEX: :float multicolumn
 [[file:images/dem_and_slope.png]]
 
 The most common data format for the storage of DEMs is GeoTiff.
@@ -136,11 +137,58 @@ The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically c
 ** Deep Neural Networks
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological neurons.
+An artificial neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
+The value a neuron holds is referred to as its activation.
+When data is passing forwards through a network, each neuron has an activation determined by the input data.
+In a fully connected network, these neurons are arranged into layers, with every neuron in a layer connected to every neuron in the previous layer (Figure [[fig:neural_network]]).
+The first layer is the input layer, the last the output layer and the layers in-between are hidden layers.
+In image processing tasks, such as image inpainting, the neurons in the input layer correspond to the pixels of the input image.
+The layered structure of the neural network is highly efficient as it allows the network to break down complex problems into smaller steps.
 
-Biases are values associated
-Gradient descent and local minimum. - ball down a hill
-Batch size, effect of
-epoch
+#+CAPTION: Simple feedforward artifical neural network[cite:@ArtificialNeuralNetwork2023]
+#+NAME: fig:neural_network
+[[file:images/neural_network.png]]
+
+Each connection between neurons in different layers has an associated weight.
+This weight is an indication of how the neuron in the second layer is correlated to the neuron in the first.
+A positive weight indicates that when the first neuron has a high activation so should the second, and a negative weight the inverse.
+Each neuron also holds a value called a bias, which can be thought of as the minimum weighted sum for the neuron to activate.
+To compute the activation of a second layer neuron, take the sum of the activations of the first layer neurons multiplied with their weights and add the bias (Equation [[eqn:activation]]).
+The activation can be any number, however to normalise the signal between a range and add non-linearity to the network the activation is passed through an activation function.
+Leaky ReLU (Rectified Linear Unit) (Figure [[fig:LeakyReLU]]) is an activation function which can introduce sparsity into the network, meaning only a subset of neurons will be activated for any given input, which can reduce the networks complexity and improve its computational efficiency.
+The normal ReLU function can can completely deactivate neurons, causing data loss.
+For this reason Leaky ReLU was used in the network described by this paper.
+
+#+CAPTION: Leaky ReLU activation function with negative slope of 0.1[cite:@LeakyReLUPyTorchDocumentation]
+#+NAME: fig:LeakyReLU
+[[file:images/LeakyReLU.png]]
+
+#+NAME: eqn:activation
+\begin{equation}
+a^{(1)}_0 = LeakyReLU(w_{0,0}a^{(0)}_0 + w_{0,1}a^{(0)}_1 + \cdots + w_{0,n}a^{(0)}_n + b_0)
+\end{equation}
+
+As the equations are linear, to efficiently compute the activation of every neuron in a forward layer, the equations can be stacked into matrices:
+\begin{equation}
+\begin{bmatrix} a^{(1)}_0 \\ a^{(1)}_1 \\ \vdots \\ a_n^{(1)} \end{bmatrix} = LeakyReLU \left( \begin{bmatrix}w_{0,0} & w_{0,1} & \dots & w_{0,n} \\ w_{1,0} & w_{1,1} & \dots & w_{1,n} \\ \vdots & \vdots & \ddots & \vdots \\ w_{k,0} & w_{k,1} & \dots & w_{k,n} \end{bmatrix} \begin{bmatrix} a_0^{(0)} \\ a_1^{(0)} \\ \vdots \\ a_n^{(0)} \end{bmatrix} + \begin{bmatrix} b_0 \\ b_1 \\ \vdots \\ b_n \end{bmatrix} \right)
+\end{equation}
+
+A cost function such as Mean Squared Error (MSE) is used to measure how well the network is performing.
+As the network is itself a function, the cost function is a function which takes all the weights and biases of the network as inputs and returns a value describing how well these weights and biases perform.
+A neural network is trained with the following steps.
+Input data is propagated forwards through the network layer by layer.
+The cost function is then evaluated using the predicted output and the actual output, with the error between the two values calculated.
+The error is then backpropagated through the network, layer by layer, starting from the output layer.
+The desired output of the output layer is known, so by working backwards layer by layer the activations of each neuron that would have resulted in the desired output can be calculated.
+The error at each layer is used to calculate the gradient of the cost function with respect to the weights of that layer.
+The weights and biases of the network are updated using the gradients calculated during backpropagation by using an optimisation algorithm such as stochastic gradient descent (SGD), which adjusts the weights and biases in a way that takes a step down the gradient towards a local minimum of the cost function; with the steeper the gradient the greater the step taken.
+The network can become stuck in a local minimum, as it is impossible to know what the true minimum is, only the downwards direction is known.
+An analogy for this would be rolling a ball down a hill.
+
+As calculating the gradient for the entire dataset is very computationally difficult, the data is batched, with the cost function calculated for each example in a batch and then averaged to get a single cost value for the batch - which is then backpropagated.
+An epoch is the entire set of training data. It normally takes multiple epochs of training data for the network to converge at a set of weights that minimise the cost function.
+
+A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
 *** Convolutional Neural Networks
 
