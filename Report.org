@@ -136,11 +136,11 @@ The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically c
 
 ** Deep Neural Networks
 
-Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological neurons.
-An artificial neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
+Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons[cite:@grossiIntroductionArtificialNeural2008].
+A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
 The value a neuron holds is referred to as its activation.
 When data is passing forwards through a network, each neuron has an activation determined by the input data.
-In a fully connected network, these neurons are arranged into layers, with every neuron in a layer connected to every neuron in the previous layer (Figure [[fig:neural_network]]).
+In a fully connected network, these neurons are arranged into layers, with every neuron in a layer connected to every neuron in the previous layer (Figure [[fig:neural_network]]) .
 The first layer is the input layer, the last the output layer and the layers in-between are hidden layers.
 In image processing tasks, such as image inpainting, the neurons in the input layer correspond to the pixels of the input image.
 The layered structure of the neural network is highly efficient as it allows the network to break down complex problems into smaller steps.
@@ -159,16 +159,16 @@ Leaky ReLU (Rectified Linear Unit) (Figure [[fig:LeakyReLU]]) is an activation f
 The normal ReLU function can can completely deactivate neurons, causing data loss.
 For this reason Leaky ReLU was used in the network described by this paper.
 
-#+CAPTION: Leaky ReLU activation function with negative slope of 0.1[cite:@LeakyReLUPyTorchDocumentation]
-#+NAME: fig:LeakyReLU
-[[file:images/LeakyReLU.png]]
-
 #+NAME: eqn:activation
 \begin{equation}
 a^{(1)}_0 = LeakyReLU(w_{0,0}a^{(0)}_0 + w_{0,1}a^{(0)}_1 + \cdots + w_{0,n}a^{(0)}_n + b_0)
 \end{equation}
 
-As the equations are linear, to efficiently compute the activation of every neuron in a forward layer, the equations can be stacked into matrices:
+#+CAPTION: Leaky ReLU activation function with negative slope of 0.1[cite:@LeakyReLUPyTorchDocumentation]
+#+NAME: fig:LeakyReLU
+[[file:images/LeakyReLU.png]]
+
+As the equations are linear, to efficiently compute the activation of every neuron in a forward layer, the equations can be stacked into matrices[cite:@3Blue1BrownWhatNeural] :
 \begin{equation}
 \begin{bmatrix} a^{(1)}_0 \\ a^{(1)}_1 \\ \vdots \\ a_n^{(1)} \end{bmatrix} = LeakyReLU \left( \begin{bmatrix}w_{0,0} & w_{0,1} & \dots & w_{0,n} \\ w_{1,0} & w_{1,1} & \dots & w_{1,n} \\ \vdots & \vdots & \ddots & \vdots \\ w_{k,0} & w_{k,1} & \dots & w_{k,n} \end{bmatrix} \begin{bmatrix} a_0^{(0)} \\ a_1^{(0)} \\ \vdots \\ a_n^{(0)} \end{bmatrix} + \begin{bmatrix} b_0 \\ b_1 \\ \vdots \\ b_n \end{bmatrix} \right)
 \end{equation}
@@ -180,8 +180,8 @@ Input data is propagated forwards through the network layer by layer.
 The cost function is then evaluated using the predicted output and the actual output, with the error between the two values calculated.
 The error is then backpropagated through the network, layer by layer, starting from the output layer.
 The desired output of the output layer is known, so by working backwards layer by layer the activations of each neuron that would have resulted in the desired output can be calculated.
-The error at each layer is used to calculate the gradient of the cost function with respect to the weights of that layer.
-The weights and biases of the network are updated using the gradients calculated during backpropagation by using an optimisation algorithm such as stochastic gradient descent (SGD), which adjusts the weights and biases in a way that takes a step down the gradient towards a local minimum of the cost function; with the steeper the gradient the greater the step taken.
+The error at each layer is used to calculate the gradient of the cost function with respect to the weights of that layer[cite:@leTutorialDeepLearning2015].
+The weights and biases of the network are updated using the gradients calculated during backpropagation by using an optimisation algorithm such as stochastic gradient descent (SGD)[cite:@ruderOverviewGradientDescent2016], which adjusts the weights and biases in a way that takes a step down the gradient towards a local minimum of the cost function; with the steeper the gradient the greater the step taken.
 The network can become stuck in a local minimum, as it is impossible to know what the true minimum is, only the downwards direction is known.
 An analogy for this would be rolling a ball down a hill.
 
@@ -191,6 +191,44 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
 *** Convolutional Neural Networks
+
+#+CAPTION: Convolution step[cite:@ConvolutionalNeuralNetworks]
+#+NAME: fig:convolution
+[[file:images/convolution.png]]
+
+A convolutional neural network (CNN) is comprised of layers of 2D convolutions.
+These layers consist of filters which themselves are comprised of kernels, small matrices with learned weights as values[cite:@osheaIntroductionConvolutionalNeural2015].
+Filters have a kernel for each input channel to the layer, with each kernel moving accross the channel and performing an elementwise multiplication with the part of the input it is currently on (Figure [[fig:convolution]]).
+The results of all kernels in a filter are summed into a single output pixel, meaning that each filter produces one output channel.
+The stride of the layer determines how far the filter moves over the data every convolution, therefore a stride greater than one reduces the spatial dimensions by a factor of the stride size[cite:@dumoulinGuideConvolutionArithmetic2018].
+The inverse is also true, a sub-pixel stride of less than one increases the spatial dimensions, however this can lead to checkerboard artifacts where kernels overlap so a more appropriate technique is to interpolate the image into a larger size and then convolve over it, referred to as a resize-convolution[cite:@odenaDeconvolutionCheckerboardArtifacts2016][cite:@aitkenCheckerboardArtifactFree2017]
+
+#+CAPTION: Visualised convolution filters, with increasing complexity of features extracted[cite:@graetzHowVisualizeConvolutional2019]
+#+NAME: fig:convolution_filter
+[[file:images/convolution_filter.png]]
+
+Each kernel is unique, with the values of the matrix being the weights learned by through training.
+Filters have a bias, which gets added to all values in the output data.
+By using filters with a stride greater than 1, the number of output channels can be increased whilst the spatial dimensions of the data is decreased.
+This is a fundamental pattern in a CNN, as it allows for kernels to learn to extract features.
+By reducing the spatial dimensions of the image, earlier layers extract low level features which get combined by following layers (Figure [[fig:convolution_filter]]).
+The compression of the input data also allows for later kernels to extract patterns from an area much larger than their kernel size .
+
+#+CAPTION: Simplified diagram of an autoencoder[cite:@birlaAutoencoders2019]
+#+NAME: fig:autoencoder
+[[file:images/autoencoder.png]]
+
+*Autoencoders* are comprised of convolutional layers which manipulate spatial dimensions and the number of channels.
+Autoencoders feature an encoder and decoder (Figure [[fig:autoencoder]]).
+The encoder is trained to reduce the spatial dimensions of the input data whilst increasing the number of channels.
+The latent space is the result of this encoding, a lower-dimensional compressed representation of the data.
+In a trained network, the latent space captures the most important features and patterns of the input data in a compact and efficient way[cite:@michelucciIntroductionAutoencoders2022].
+This representation is generalised, two different craters would be represented as craters, even if they had visual differences.
+Autoencoders are useful for image inpainting as the latent space more clearly demonstrates the missing parts of features.
+The decoder is trained to translate the latent space back into the inpainted image.
+A famous use of autoencoders is in "deepfake" networks which swap faces in images.
+In a deepfake network, separate autoencoders are trained for the two faces.
+By swapping the decoder from one autoencoder into another, the autoencoder encodes properties (such face angle) for one face, however decodes the image with the other face.
 
 *** Generative Adversarial Networks
 

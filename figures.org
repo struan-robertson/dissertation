@@ -138,27 +138,27 @@ tiled = tile(dem, (256,256))
 #+RESULTS:
 
 #+begin_src jupyter-python
-tile_n = 0
-tile = tiled[0][tile_n]
+tile_n = 7
+t = tiled[0][tile_n]
 
-tile = torch.transpose(tile, (1, 2, 0))
-plt.imshow(tile[0])
+t = t.cpu().detach().numpy()
+
+t = np.transpose(t, (1, 2, 0))
+
+
+plt.figure(figsize=(8,10))
+plt.subplot(1,2,1)
+plt.imshow(t[:,:,0], cmap='terrain')
+plt.title("DEM")
+plt.axis('off')
+plt.subplot(1,2,2)
+plt.imshow(t[:,:,1], cmap='viridis')
+plt.title("Slope")
+plt.axis('off')
+plt.savefig('images/dem_and_slope.png', bbox_inches='tight')
+plt.show()
+# plt.colorbar()
 #+end_src
 
 #+RESULTS:
-:RESULTS:
-# [goto error]
-#+begin_example
----------------------------------------------------------------------------
-TypeError                                 Traceback (most recent call last)
-Cell In[35], line 4
-      1 tile_n = 0
-      2 tile = tiled[0][tile_n]
-----> 4 tile = torch.transpose(tile, (1, 2, 0))
-      5 plt.imshow(tile[0])
-
-TypeError: transpose() received an invalid combination of arguments - got (Tensor, tuple), but expected one of:
- ,* (Tensor input, int dim0, int dim1)
- ,* (Tensor input, name dim0, name dim1)
-#+end_example
-:END:
+[[file:./.ob-jupyter/39ce4a346485fc886283636e3c62482d1a9460a8.png]]

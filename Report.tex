@@ -1,4 +1,4 @@
-% Created 2023-04-12 Wed 00:52
+% Created 2023-04-13 Thu 00:25
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:orgf53dd36}
+\label{sec:orgcc46b58}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -105,9 +105,9 @@ This papers implements a GAN inpainting network based on the structure described
 The final challenge of DEM reliability may be passed by this network, however this is difficult to test as GANs excel at infilling \emph{plausible} data, yet the \emph{accuracy} of this data may not be necessarily sufficient.
 
 \section{Background}
-\label{sec:org077d73f}
+\label{sec:org6087071}
 \subsection{Digital Elevation Maps}
-\label{sec:org9c89ac4}
+\label{sec:org0471505}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -153,13 +153,13 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:orgfcdaedb}
+\label{sec:org0c2aa29}
 
-Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological neurons.
-An artificial neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
+Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
+A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
 The value a neuron holds is referred to as its activation.
 When data is passing forwards through a network, each neuron has an activation determined by the input data.
-In a fully connected network, these neurons are arranged into layers, with every neuron in a layer connected to every neuron in the previous layer (Figure \ref{fig:neural_network}).
+In a fully connected network, these neurons are arranged into layers, with every neuron in a layer connected to every neuron in the previous layer (Figure \ref{fig:neural_network}) .
 The first layer is the input layer, the last the output layer and the layers in-between are hidden layers.
 In image processing tasks, such as image inpainting, the neurons in the input layer correspond to the pixels of the input image.
 The layered structure of the neural network is highly efficient as it allows the network to break down complex problems into smaller steps.
@@ -180,18 +180,18 @@ Leaky ReLU (Rectified Linear Unit) (Figure \ref{fig:LeakyReLU}) is an activation
 The normal ReLU function can can completely deactivate neurons, causing data loss.
 For this reason Leaky ReLU was used in the network described by this paper.
 
+\begin{equation}
+\label{eqn:activation}
+a^{(1)}_0 = LeakyReLU(w_{0,0}a^{(0)}_0 + w_{0,1}a^{(0)}_1 + \cdots + w_{0,n}a^{(0)}_n + b_0)
+\end{equation}
+
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.9\linewidth]{images/LeakyReLU.png}
 \caption{\label{fig:LeakyReLU}Leaky ReLU activation function with negative slope of 0.1\autocite{LeakyReLUPyTorchDocumentation}}
 \end{figure}
 
-\begin{equation}
-\label{eqn:activation}
-a^{(1)}_0 = LeakyReLU(w_{0,0}a^{(0)}_0 + w_{0,1}a^{(0)}_1 + \cdots + w_{0,n}a^{(0)}_n + b_0)
-\end{equation}
-
-As the equations are linear, to efficiently compute the activation of every neuron in a forward layer, the equations can be stacked into matrices:
+As the equations are linear, to efficiently compute the activation of every neuron in a forward layer, the equations can be stacked into matrices\autocite{3Blue1BrownWhatNeural} :
 \begin{equation}
 \begin{bmatrix} a^{(1)}_0 \\ a^{(1)}_1 \\ \vdots \\ a_n^{(1)} \end{bmatrix} = LeakyReLU \left( \begin{bmatrix}w_{0,0} & w_{0,1} & \dots & w_{0,n} \\ w_{1,0} & w_{1,1} & \dots & w_{1,n} \\ \vdots & \vdots & \ddots & \vdots \\ w_{k,0} & w_{k,1} & \dots & w_{k,n} \end{bmatrix} \begin{bmatrix} a_0^{(0)} \\ a_1^{(0)} \\ \vdots \\ a_n^{(0)} \end{bmatrix} + \begin{bmatrix} b_0 \\ b_1 \\ \vdots \\ b_n \end{bmatrix} \right)
 \end{equation}
@@ -203,8 +203,8 @@ Input data is propagated forwards through the network layer by layer.
 The cost function is then evaluated using the predicted output and the actual output, with the error between the two values calculated.
 The error is then backpropagated through the network, layer by layer, starting from the output layer.
 The desired output of the output layer is known, so by working backwards layer by layer the activations of each neuron that would have resulted in the desired output can be calculated.
-The error at each layer is used to calculate the gradient of the cost function with respect to the weights of that layer.
-The weights and biases of the network are updated using the gradients calculated during backpropagation by using an optimisation algorithm such as stochastic gradient descent (SGD), which adjusts the weights and biases in a way that takes a step down the gradient towards a local minimum of the cost function; with the steeper the gradient the greater the step taken.
+The error at each layer is used to calculate the gradient of the cost function with respect to the weights of that layer\autocite{leTutorialDeepLearning2015}.
+The weights and biases of the network are updated using the gradients calculated during backpropagation by using an optimisation algorithm such as stochastic gradient descent (SGD)\autocite{ruderOverviewGradientDescent2016}, which adjusts the weights and biases in a way that takes a step down the gradient towards a local minimum of the cost function; with the steeper the gradient the greater the step taken.
 The network can become stuck in a local minimum, as it is impossible to know what the true minimum is, only the downwards direction is known.
 An analogy for this would be rolling a ball down a hill.
 
@@ -212,40 +212,85 @@ As calculating the gradient for the entire dataset is very computationally diffi
 An epoch is the entire set of training data. It normally takes multiple epochs of training data for the network to converge at a set of weights that minimise the cost function.
 
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
+
 \subsubsection{Convolutional Neural Networks}
-\label{sec:org29b0a43}
+\label{sec:orgf70e678}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{images/convolution.png}
+\caption{\label{fig:convolution}Convolution step\autocite{ConvolutionalNeuralNetworks}}
+\end{figure}
+
+A convolutional neural network (CNN) is comprised of layers of 2D convolutions.
+These layers consist of filters which themselves are comprised of kernels, small matrices with learned weights as values\autocite{osheaIntroductionConvolutionalNeural2015}.
+Filters have a kernel for each input channel to the layer, with each kernel moving accross the channel and performing an elementwise multiplication with the part of the input it is currently on (Figure \ref{fig:convolution}).
+The results of all kernels in a filter are summed into a single output pixel, meaning that each filter produces one output channel.
+The stride of the layer determines how far the filter moves over the data every convolution, therefore a stride greater than one reduces the spatial dimensions by a factor of the stride size\autocite{dumoulinGuideConvolutionArithmetic2018}.
+The inverse is also true, a sub-pixel stride of less than one increases the spatial dimensions, however this can lead to checkerboard artifacts where kernels overlap so a more appropriate technique is to interpolate the image into a larger size and then convolve over it, referred to as a resize-convolution\autocite{odenaDeconvolutionCheckerboardArtifacts2016}\autocite{aitkenCheckerboardArtifactFree2017}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{images/convolution_filter.png}
+\caption{\label{fig:convolution_filter}Visualised convolution filters, with increasing complexity of features extracted\autocite{graetzHowVisualizeConvolutional2019}}
+\end{figure}
+
+Each kernel is unique, with the values of the matrix being the weights learned by through training.
+Filters have a bias, which gets added to all values in the output data.
+By using multiple filters with a stride greater than 1, the number of output channels can be increased whilst the spatial dimensions of the data is decreased.
+This is a fundamental pattern in a CNN, as it allows for kernels to learn to extract features.
+By reducing the spatial dimensions of the image, earlier layers extract low level features which get combined by following layers (Figure \ref{fig:convolution_filter}).
+The compression of the input data also allows for later kernels to extract patterns from an area much larger than their kernel size .
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{images/autoencoder.png}
+\caption{\label{fig:autoencoder}Simplified diagram of an autoencoder\autocite{birlaAutoencoders2019}}
+\end{figure}
+
+\textbf{Autoencoders} are comprised of convolutional layers which manipulate spatial dimensions and the number of channels.
+Autoencoders feature an encoder and decoder (Figure \ref{fig:autoencoder}).
+The encoder is trained to reduce the spatial dimensions of the input data whilst increasing the number of channels.
+The latent space is the result of this encoding, a lower-dimensional compressed representation of the data.
+In a trained network, the latent space captures the most important features and patterns of the input data in a compact and efficient way\autocite{michelucciIntroductionAutoencoders2022}.
+This representation is generalised, two different craters would be represented as craters, even if they had visual differences.
+Autoencoders are useful for image inpainting as the latent space more clearly demonstrates the missing parts of features.
+The decoder is trained to translate the latent space back into the inpainted image.
+A famous use of autoencoders is in "deepfake" networks which swap faces in images.
+In a deepfake network, separate autoencoders are trained for the two faces.
+By swapping the decoder from one autoencoder into another, the autoencoder encodes properties (such face angle) for one face, however decodes the image with the other face.
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:orgca64abd}
+\label{sec:org5aecf5d}
 
 \subsection{Poisson Blending}
-\label{sec:org7b2e31a}
+\label{sec:org98a8082}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \section{Specification}
-\label{sec:org4d1300a}
+\label{sec:org60fea96}
 
 \section{Design}
-\label{sec:org41a7939}
+\label{sec:orgb037554}
 
 \section{Implementation and Testing}
-\label{sec:orge2d3233}
+\label{sec:org6ea063d}
 
 \section{Evaluation / Testing}
-\label{sec:org8c16e97}
+\label{sec:org702c7c1}
 
 \section{Description of the final product}
-\label{sec:org2028791}
+\label{sec:orgcc9d026}
 
 \section{Appraisal}
-\label{sec:orgd125035}
+\label{sec:org6eebced}
 
 \section{Summary and Conclusions}
-\label{sec:org53a5bf7}
+\label{sec:orgdb65dba}
 
 \section{Future Work}
-\label{sec:org24fc01a}
+\label{sec:org7bd8eec}
 
 \section*{Acknowledgements}
 
