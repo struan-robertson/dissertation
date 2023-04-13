@@ -209,16 +209,21 @@ The inverse is also true, a sub-pixel stride of less than one increases the spat
 
 Each kernel is unique, with the values of the matrix being the weights learned by through training.
 Filters have a bias, which gets added to all values in the output data.
-By using filters with a stride greater than 1, the number of output channels can be increased whilst the spatial dimensions of the data is decreased.
+By using multiple filters with a stride greater than 1, the number of output channels can be increased whilst the spatial dimensions of the data is decreased.
 This is a fundamental pattern in a CNN, as it allows for kernels to learn to extract features.
 By reducing the spatial dimensions of the image, earlier layers extract low level features which get combined by following layers (Figure [[fig:convolution_filter]]).
 The compression of the input data also allows for later kernels to extract patterns from an area much larger than their kernel size .
+Dilated convolutions expand the kernel by inserting holes between its elements, allowing the kernel to cover a larger area than its size[cite:@dumoulinGuideConvolutionArithmetic2018].
+In combination with the compression of input data in latent space, dilated convolutions in latent space can allow the network to learn complex and large features for little computational cost.
+
 
 #+CAPTION: Simplified diagram of an autoencoder[cite:@birlaAutoencoders2019]
 #+NAME: fig:autoencoder
 [[file:images/autoencoder.png]]
 
-*Autoencoders* are comprised of convolutional layers which manipulate spatial dimensions and the number of channels.
+*Autoencoders*
+
+Autoencoders are comprised of convolutional layers which manipulate spatial dimensions and the number of channels.
 Autoencoders feature an encoder and decoder (Figure [[fig:autoencoder]]).
 The encoder is trained to reduce the spatial dimensions of the input data whilst increasing the number of channels.
 The latent space is the result of this encoding, a lower-dimensional compressed representation of the data.
@@ -230,7 +235,44 @@ A famous use of autoencoders is in "deepfake" networks which swap faces in image
 In a deepfake network, separate autoencoders are trained for the two faces.
 By swapping the decoder from one autoencoder into another, the autoencoder encodes properties (such face angle) for one face, however decodes the image with the other face.
 
+
 *** Generative Adversarial Networks
+Generative adversarial networks (GANs)[cite:@goodfellowGenerativeAdversarialNetworks2020] are a machine learning framework based on game theory.
+They are constructed from two opposing networks, a generator and a discriminator.
+The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
+The adversarial loss between the competing networks is able to catch errors which would be overlooked by other loss functions, such as mean squared error[cite:@lotterUnsupervisedLearningVisual2016].
+
+A difficult challenge of training GANs is keeping the training of both generator and discriminator balanced.
+If one network becomes substantially better than the other, the gradient for the better network will explode and the other networks gradient will vanish.
+Wasserstein GANs[cite:@arjovskyWassersteinGenerativeAdversarial2017] improve this situation by using the Wasserstein-1 distance to measure discrepancy between real and generated data distributions.
+The Wasserstein-1 distance is a measure of how much effort it would take to move one probability density into another.
+The continuous nature of the Wasserstein-1 distance leads to more stable gradients.
+To further improve the stability of the network, gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates.
+If one trains faster than the other, the gradient descent is penalised to allow the other to close the gap.
+
+A GAN containing only convolutional layers is referred to as a deep convolutional GAN[cite:@radfordUnsupervisedRepresentationLearning2016].
+This simplification of the network is more computationally efficient than the GAN first proposed by Goodfellow et al.[cite:@goodfellowGenerativeAdversarialNetworks2020], whilst allowing for deeper models and increased image resolution.
+GANs typically use encoders and decoders, as novel data can be hallucinated in the latent space and then decoded to the output.
+The addition of dilated convolutions[cite:@yuMultiScaleContextAggregation2016] as four layers in the latent space adds an enhanced receptive field, allowing for improved feature learning.
+
+GAN training is unsupervised, meaning that it the training data set does not need to be labeled.
+This is because data is known to be real or generated, and so the loss function can operate independently.
+As training neural networks requires large amounts of data, unsupervised training requires far less human effort to achieve.
+GANs are well suited for the task of void infilling, as the adversarial loss results in the generator being trained to generate the accurate DEMs, without the need of manually labeling voids locations.
+
+*Contextual Attention*
+
+Image features are extracted in convolutional neural networks with local kernels layer by layer.
+This locality reduces the kernels effectiveness at borrowing from distant spatial locations; there may be many layers of convolutions reducing image spatial dimensions before data from other parts of the image become relevant to a kernel.
+Yu et al.[cite:@yuGenerativeImageInpainting2018] proposed a novel contextual attention layer in the deep generative network to remedy this issue.
+This layer learns where to copy feature information from in the known background (non-masked part of the image) to generate missing patches (Figure [[fig:contextual_attention]]).
+This concept is inspired by human attention, people selectively attend to specific aspects of the the environment based on their relevance or saliency.
+As the layer is differentiable it can be trained, improving the efficiency of the network as a whole.
+The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
+
+#+CAPTION:Contextual attention focusing network on cat [cite:@zhangAgileAmuletRealTime2018]
+#+NAME: fig:contextual_attention
+[[file:images/contextual_attention.png]]
 
 ** Poisson Blending
 Due to the similarity with images, image processing techniques can be applied to the DEMs.

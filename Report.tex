@@ -1,4 +1,4 @@
-% Created 2023-04-13 Thu 00:25
+% Created 2023-04-13 Thu 04:15
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:orgcc46b58}
+\label{sec:org896f3b8}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -105,9 +105,9 @@ This papers implements a GAN inpainting network based on the structure described
 The final challenge of DEM reliability may be passed by this network, however this is difficult to test as GANs excel at infilling \emph{plausible} data, yet the \emph{accuracy} of this data may not be necessarily sufficient.
 
 \section{Background}
-\label{sec:org6087071}
+\label{sec:org6615f34}
 \subsection{Digital Elevation Maps}
-\label{sec:org0471505}
+\label{sec:org7428e97}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -153,7 +153,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org0c2aa29}
+\label{sec:org40f8c3a}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -214,7 +214,7 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:orgf70e678}
+\label{sec:org24d37ab}
 
 \begin{figure}[htbp]
 \centering
@@ -241,6 +241,9 @@ By using multiple filters with a stride greater than 1, the number of output cha
 This is a fundamental pattern in a CNN, as it allows for kernels to learn to extract features.
 By reducing the spatial dimensions of the image, earlier layers extract low level features which get combined by following layers (Figure \ref{fig:convolution_filter}).
 The compression of the input data also allows for later kernels to extract patterns from an area much larger than their kernel size .
+Dilated convolutions expand the kernel by inserting holes between its elements, allowing the kernel to cover a larger area than its size\autocite{dumoulinGuideConvolutionArithmetic2018}.
+In combination with the compression of input data in latent space, dilated convolutions in latent space can allow the network to learn complex and large features for little computational cost.
+
 
 \begin{figure}[htbp]
 \centering
@@ -248,7 +251,9 @@ The compression of the input data also allows for later kernels to extract patte
 \caption{\label{fig:autoencoder}Simplified diagram of an autoencoder\autocite{birlaAutoencoders2019}}
 \end{figure}
 
-\textbf{Autoencoders} are comprised of convolutional layers which manipulate spatial dimensions and the number of channels.
+\textbf{Autoencoders}
+
+Autoencoders are comprised of convolutional layers which manipulate spatial dimensions and the number of channels.
 Autoencoders feature an encoder and decoder (Figure \ref{fig:autoencoder}).
 The encoder is trained to reduce the spatial dimensions of the input data whilst increasing the number of channels.
 The latent space is the result of this encoding, a lower-dimensional compressed representation of the data.
@@ -260,37 +265,76 @@ A famous use of autoencoders is in "deepfake" networks which swap faces in image
 In a deepfake network, separate autoencoders are trained for the two faces.
 By swapping the decoder from one autoencoder into another, the autoencoder encodes properties (such face angle) for one face, however decodes the image with the other face.
 
+
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org5aecf5d}
+\label{sec:org434cfac}
+Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
+They are constructed from two opposing networks, a generator and a discriminator.
+The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
+The adversarial loss between the competing networks is able to catch errors which would be overlooked by other loss functions, such as mean squared error\autocite{lotterUnsupervisedLearningVisual2016}.
+
+A difficult challenge of training GANs is keeping the training of both generator and discriminator balanced.
+If one network becomes substantially better than the other, the gradient for the better network will explode and the other networks gradient will vanish.
+Wasserstein GANs\autocite{arjovskyWassersteinGenerativeAdversarial2017} improve this situation by using the Wasserstein-1 distance to measure discrepancy between real and generated data distributions.
+The Wasserstein-1 distance is a measure of how much effort it would take to move one probability density into another.
+The continuous nature of the Wasserstein-1 distance leads to more stable gradients.
+To further improve the stability of the network, gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates.
+If one trains faster than the other, the gradient descent is penalised to allow the other to close the gap.
+
+A GAN containing only convolutional layers is referred to as a deep convolutional GAN\autocite{radfordUnsupervisedRepresentationLearning2016}.
+This simplification of the network is more computationally efficient than the GAN first proposed by Goodfellow et al.\autocite{goodfellowGenerativeAdversarialNetworks2020}, whilst allowing for deeper models and increased image resolution.
+GANs typically use encoders and decoders, as novel data can be hallucinated in the latent space and then decoded to the output.
+The addition of dilated convolutions\autocite{yuMultiScaleContextAggregation2016} as four layers in the latent space adds an enhanced receptive field, allowing for improved feature learning.
+
+GAN training is unsupervised, meaning that it the training data set does not need to be labeled.
+This is because data is known to be real or generated, and so the loss function can operate independently.
+As training neural networks requires large amounts of data, unsupervised training requires far less human effort to achieve.
+GANs are well suited for the task of void infilling, as the adversarial loss results in the generator being trained to generate the accurate DEMs, without the need of manually labeling voids locations.
+
+\textbf{Contextual Attention}
+
+Image features are extracted in convolutional neural networks with local kernels layer by layer.
+This locality reduces the kernels effectiveness at borrowing from distant spatial locations; there may be many layers of convolutions reducing image spatial dimensions before data from other parts of the image become relevant to a kernel.
+Yu et al.\autocite{yuGenerativeImageInpainting2018} proposed a novel contextual attention layer in the deep generative network to remedy this issue.
+This layer learns where to copy feature information from in the known background (non-masked part of the image) to generate missing patches (Figure \ref{fig:contextual_attention}).
+This concept is inspired by human attention, people selectively attend to specific aspects of the the environment based on their relevance or saliency.
+As the layer is differentiable it can be trained, improving the efficiency of the network as a whole.
+The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{images/contextual_attention.png}
+\caption{\label{fig:contextual_attention}Contextual attention focusing network on cat \autocite{zhangAgileAmuletRealTime2018}}
+\end{figure}
 
 \subsection{Poisson Blending}
-\label{sec:org98a8082}
+\label{sec:org81c2cbe}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \section{Specification}
-\label{sec:org60fea96}
+\label{sec:org157bd4d}
 
 \section{Design}
-\label{sec:orgb037554}
+\label{sec:orgbfd83cd}
 
 \section{Implementation and Testing}
-\label{sec:org6ea063d}
+\label{sec:orga2b12ae}
 
 \section{Evaluation / Testing}
-\label{sec:org702c7c1}
+\label{sec:orge1aa761}
 
 \section{Description of the final product}
-\label{sec:orgcc9d026}
+\label{sec:org7e7ced4}
 
 \section{Appraisal}
-\label{sec:org6eebced}
+\label{sec:org9626ff5}
 
 \section{Summary and Conclusions}
-\label{sec:orgdb65dba}
+\label{sec:org0c0c747}
 
 \section{Future Work}
-\label{sec:org7bd8eec}
+\label{sec:org59f012e}
 
 \section*{Acknowledgements}
 
