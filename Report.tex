@@ -1,4 +1,4 @@
-% Created 2023-04-15 Sat 02:42
+% Created 2023-04-15 Sat 02:50
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org42968f7}
+\label{sec:org66b24c3}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -105,9 +105,15 @@ This papers implements a GAN inpainting network based on the structure described
 The final challenge of DEM reliability may be passed by this network, however this is difficult to test as GANs excel at infilling \emph{plausible} data, yet the \emph{accuracy} of this data may not be necessarily sufficient.
 
 \section{Background}
-\label{sec:org14c843c}
+\label{sec:orgc5242f1}
 \subsection{Digital Elevation Maps}
-\label{sec:org7c703fd}
+\label{sec:orgf23857d}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{images/apollo_17.png}
+\caption{\label{fig:apollo_17}Shaded DEM of Apollo 17 landing site in Taurus-Littrow Valley}
+\end{figure}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -117,12 +123,12 @@ Gridsize can vary depending on the source of data and the intended application, 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=.9\linewidth]{images/apollo_17.png}
-\caption{\label{fig:apollo_17}Shaded DEM of Apollo 17 landing site in Taurus-Littrow Valley}
+\includegraphics[width=.9\linewidth]{images/dem_and_slope.png}
+\caption{\label{fig:dem_and_slope}Section of DEM with computed slope}
 \end{figure}
 
 The slope of a DEM refers to the steepness of terrain at each location in the map (Figure \ref{fig:dem_and_slope}).
-Steepness in this context is a measure of the change in elevation over a given distance, often expressed as a percentage or angle in degrees.
+Steepness in this context is a measure of the change in elevation over a given distance.
 Slope is calculated by traversing a 3 x 3 window (Figure \ref{fig:window}) over the DEM\autocite{qiuVoidFillingDigital2019}.
 The slope value at the central pixel \emph{e} can be calculated by using the algorithm proposed by Horn \emph{et al.}\autocite{hornHillShadingReflectance1981} :
 \begin{align}
@@ -137,12 +143,6 @@ Slope_{sn} &= \frac{(e_7 + 2e_4 + e_8) - (e_6 + 2e_2 + e_5)}{8 \times Gridsize},
 \caption{\label{fig:window}The 3x3 moving window\autocite{qiuVoidFillingDigital2019}}
 \end{figure}
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=.9\linewidth]{images/dem_and_slope.png}
-\caption{\label{fig:dem_and_slope}Section of DEM with computed slope}
-\end{figure}
-
 The most common data format for the storage of DEMs is GeoTiff.
 A GeoTiff is a type of TIFF (Tagged Image File Format) that with the raw DEM raster data also stores spatial metadata such as pixel resolution (gridsize).
 Lunar DEMs are also commonly stored in NASA's PDS (Planetary Data System) archival formats PDS3 and PDS4.
@@ -153,7 +153,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org3806a1c}
+\label{sec:org4983a99}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -220,7 +220,7 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:org24db9db}
+\label{sec:orgfdc3cf3}
 
 \begin{figure}[htbp]
 \centering
@@ -273,7 +273,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org908a3c0}
+\label{sec:org32e08d3}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -314,21 +314,21 @@ The fully-convolutional nature of the contextual attention layer results in it b
 \end{figure}
 
 \subsection{Poisson Blending}
-\label{sec:org131e5a8}
+\label{sec:org7a29087}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \section{Specification}
-\label{sec:org20a89cb}
+\label{sec:org240adba}
 
 \section{Design}
-\label{sec:org751c7d0}
+\label{sec:org7f306ee}
 
 \section{Implementation and Testing}
-\label{sec:org907615b}
+\label{sec:orge1dd855}
 
 \section{Evaluation / Testing}
-\label{sec:org1a8b520}
+\label{sec:orgbb1e15a}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
@@ -343,16 +343,16 @@ In this paper, the technique of poisson seamless cloning\autocite{perezPoissonIm
 \end{center}
 
 \section{Description of the final product}
-\label{sec:org0d48ef5}
+\label{sec:org5b07dbb}
 
 \section{Appraisal}
-\label{sec:org5bd60a9}
+\label{sec:orge2eb2fe}
 
 \section{Summary and Conclusions}
-\label{sec:orgc2a7d03}
+\label{sec:org1616b0b}
 
 \section{Future Work}
-\label{sec:orgdb5fdcd}
+\label{sec:orgdda5786}
 
 \section*{Acknowledgements}
 

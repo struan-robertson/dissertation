@@ -97,12 +97,6 @@ The final challenge of DEM reliability may be passed by this network, however th
 * Background
 ** Digital Elevation Maps
 
-Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure [[fig:apollo_17]]).
-A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
-The cells of a DEM can also be described as pixels, as they represent a discrete location in a raster grid.
-DEM gridsize refers to the size of cells and can be thought of as the resolution of the DEM.
-Gridsize can vary depending on the source of data and the intended application, with common grid sizes ranging from a few meters to several kilometers.
-
 #+NAME: apollo_17
 #+begin_src jupyter-python :file images/apollo_17.png :eval never-export
 import numpy as np
@@ -126,20 +120,11 @@ plt.show()
 #+RESULTS: apollo_17
 [[file:images/apollo_17.png]]
 
-The slope of a DEM refers to the steepness of terrain at each location in the map (Figure [[fig:dem_and_slope]]).
-Steepness in this context is a measure of the change in elevation over a given distance, often expressed as a percentage or angle in degrees.
-Slope is calculated by traversing a 3 x 3 window (Figure [[fig:window]]) over the DEM[cite:@qiuVoidFillingDigital2019].
-The slope value at the central pixel /e/ can be calculated by using the algorithm proposed by Horn /et al./[cite:@hornHillShadingReflectance1981] :
-\begin{align}
-Slope &= arctan\sqrt{Slope^2_{we} + Slope^2_{sn}}, \\
-Slope_{we} &= \frac{(e_8 + 2e_1 + e_5) - (e_7 + 2e_3 + e_6)}{8 \times Gridsize}, \\
-Slope_{sn} &= \frac{(e_7 + 2e_4 + e_8) - (e_6 + 2e_2 + e_5)}{8 \times Gridsize},
-\end{align}
-
-#+CAPTION: The 3x3 moving window[cite:@qiuVoidFillingDigital2019]
-#+NAME: fig:window
-#+ATTR_LATEX: :width 4cm
-[[file:images/window.png]]
+Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure [[fig:apollo_17]]).
+A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
+The cells of a DEM can also be described as pixels, as they represent a discrete location in a raster grid.
+DEM gridsize refers to the size of cells and can be thought of as the resolution of the DEM.
+Gridsize can vary depending on the source of data and the intended application, with common grid sizes ranging from a few meters to several kilometers.
 
 #+NAME: dem_and_slope
 #+begin_src jupyter-python :file images/dem_and_slope.png
@@ -171,6 +156,21 @@ plt.show()
 #+NAME: fig:dem_and_slope
 #+RESULTS: dem_and_slope
 [[file:images/dem_and_slope.png]]
+
+The slope of a DEM refers to the steepness of terrain at each location in the map (Figure [[fig:dem_and_slope]]).
+Steepness in this context is a measure of the change in elevation over a given distance.
+Slope is calculated by traversing a 3 x 3 window (Figure [[fig:window]]) over the DEM[cite:@qiuVoidFillingDigital2019].
+The slope value at the central pixel /e/ can be calculated by using the algorithm proposed by Horn /et al./[cite:@hornHillShadingReflectance1981] :
+\begin{align}
+Slope &= arctan\sqrt{Slope^2_{we} + Slope^2_{sn}}, \\
+Slope_{we} &= \frac{(e_8 + 2e_1 + e_5) - (e_7 + 2e_3 + e_6)}{8 \times Gridsize}, \\
+Slope_{sn} &= \frac{(e_7 + 2e_4 + e_8) - (e_6 + 2e_2 + e_5)}{8 \times Gridsize},
+\end{align}
+
+#+CAPTION: The 3x3 moving window[cite:@qiuVoidFillingDigital2019]
+#+NAME: fig:window
+#+ATTR_LATEX: :width 4cm
+[[file:images/window.png]]
 
 The most common data format for the storage of DEMs is GeoTiff.
 A GeoTiff is a type of TIFF (Tagged Image File Format) that with the raw DEM raster data also stores spatial metadata such as pixel resolution (gridsize).
