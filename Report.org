@@ -1,6 +1,7 @@
 #+title: Terrain Model Processing with Machine Learning
 #+AUTHOR: Struan Robertson @@latex:\\@@ BSc (Hons) Applied Computing
 #+DATE: May 2023
+#+property: header-args :session paper :exports results :eval never-export
 #+BIBLIOGRAPHY: library.bib
 #+OPTIONS: toc:nil
 #+LANGUAGE: en-gb
@@ -102,8 +103,27 @@ The cells of a DEM can also be described as pixels, as they represent a discrete
 DEM gridsize refers to the size of cells and can be thought of as the resolution of the DEM.
 Gridsize can vary depending on the source of data and the intended application, with common grid sizes ranging from a few meters to several kilometers.
 
+#+NAME: apollo_17
+#+begin_src jupyter-python :file images/apollo_17.png :eval never-export
+import numpy as np
+from osgeo import gdal
+
+dem = '/home/struan/Development/Inpaint/Final Network/data/NAC_DTM_APOLLO17.TIF'
+dem = gdal.Open(dem)
+
+dem_arr = dem.ReadAsArray()
+threshold = -10000
+dem_arr[dem_arr < threshold] = np.nan
+
+plt.imshow(dem_arr, cmap='terrain')
+plt.axis('off')
+plt.colorbar()
+plt.show()
+#+end_src
+
 #+CAPTION: Shaded DEM of Apollo 17 landing site in Taurus-Littrow Valley
 #+NAME: fig:apollo_17
+#+RESULTS: apollo_17
 [[file:images/apollo_17.png]]
 
 The slope of a DEM refers to the steepness of terrain at each location in the map (Figure [[fig:dem_and_slope]]).
@@ -121,8 +141,35 @@ Slope_{sn} &= \frac{(e_7 + 2e_4 + e_8) - (e_6 + 2e_2 + e_5)}{8 \times Gridsize},
 #+ATTR_LATEX: :width 4cm
 [[file:images/window.png]]
 
+#+NAME: dem_and_slope
+#+begin_src jupyter-python :file images/dem_and_slope.png
+import external
+import numpy as np
+import matplotlib.pyplot as plt
+
+dem = '/home/struan/Development/Inpaint/Final Network/datac/NAC_DTM_APOLLO17.TIF'
+tiled = external.tile(dem, (256,256))
+
+tile_n = 7
+t = tiled[0][tile_n]
+t = t.cpu().detach().numpy()
+t = np.transpose(t, (1, 2, 0))
+
+plt.figure(figsize=(8,10))
+plt.subplot(1,2,1)
+plt.imshow(t[:,:,0], cmap='terrain')
+plt.title("DEM")
+plt.axis('off')
+plt.subplot(1,2,2)
+plt.imshow(t[:,:,1], cmap='viridis')
+plt.title("Slope")
+plt.axis('off')
+plt.show()
+#+end_src
+
 #+CAPTION: Section of DEM with computed slope
 #+NAME: fig:dem_and_slope
+#+RESULTS: dem_and_slope
 [[file:images/dem_and_slope.png]]
 
 The most common data format for the storage of DEMs is GeoTiff.
@@ -155,8 +202,13 @@ A positive weight indicates that when the first neuron has a high activation so 
 Each neuron also holds a value called a bias, which can be thought of as the minimum weighted sum for the neuron to activate.
 To compute the activation of a second layer neuron, take the sum of the activations of the first layer neurons multiplied with their weights and add the bias (Equation [[eqn:activation]]).
 The activation can be any number, however to normalise the signal between a range and add non-linearity to the network the activation is passed through an activation function.
-Leaky ReLU (Rectified Linear Unit) (Figure [[fig:LeakyReLU]]) is an activation function which can introduce sparsity into the network, meaning only a subset of neurons will be activated for any given input, which can reduce the networks complexity and improve its computational efficiency.
-The normal ReLU function can can completely deactivate neurons, causing data loss.
+
+ReLU (Rectified Linear Unit) is an activation function which can introduce sparsity into the network, meaning only a subset of neurons will be activated for any given input.
+The constant gradient of ReLU when the gradient is positive improves the stability of gradients in the network, making vanishing gradients less likely than other activation functions, such as sigmoid.
+ReLU introduces sparsity in the activations since it outputs zero for negative input values.
+Whilst this can simplify the network and reduce computational complexity, it can also lead to the "dying ReLU" problem, where some neurons in the network stop contributing to the output due to always receiving negative input values and having an output of zero.
+Leaky ReLU (Figure [[fig:LeakyReLU]]) introduces a small slope for negative input values, ensuring all neurons in the network can contribute to the output even if their inputs are negative.
+This can improve the performance of the network when dealing with noisy or outlier data, which is very common in DEMs.
 For this reason Leaky ReLU was used in the network described by this paper.
 
 #+NAME: eqn:activation
@@ -164,9 +216,30 @@ For this reason Leaky ReLU was used in the network described by this paper.
 a^{(1)}_0 = LeakyReLU(w_{0,0}a^{(0)}_0 + w_{0,1}a^{(0)}_1 + \cdots + w_{0,n}a^{(0)}_n + b_0)
 \end{equation}
 
-#+CAPTION: Leaky ReLU activation function with negative slope of 0.1[cite:@LeakyReLUPyTorchDocumentation]
+#+NAME: LeakyReLU
+#+begin_src jupyter-python :file images/LeakyReLU.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def leaky_relu(x, alpha=0.1):
+    return np.where(x > 0, x, alpha * x)
+
+x = np.linspace(-6, 6, 1000)
+y = leaky_relu(x)
+
+plt.plot(x, y)
+plt.xlabel('Input')
+plt.ylabel('Output')
+plt.title('Leaky ReLU Function (α=0.1)')
+plt.grid()
+plt.show()
+#+end_src
+
+#+CAPTION: Leaky ReLU activation function with negative slope of 0.1
 #+NAME: fig:LeakyReLU
+#+RESULTS: LeakyReLU
 [[file:images/LeakyReLU.png]]
+
 
 As the equations are linear, to efficiently compute the activation of every neuron in a forward layer, the equations can be stacked into matrices[cite:@3Blue1BrownWhatNeural] :
 \begin{equation}
@@ -285,6 +358,80 @@ In this paper, the technique of poisson seamless cloning[cite:@perezPoissonImage
 * Implementation and Testing
 
 * Evaluation / Testing
+
+#+begin_src jupyter-python :file images/l1_loss.png
+import matplotlib.pyplot as plt
+import numpy as np
+from external import load_losses
+
+losses = load_losses()
+
+epoch = losses[0]
+l1 = losses[1]
+
+plt.scatter(epoch, l1, s=2.5)
+a, b = np.polyfit(epoch, l1, 1)
+plt.plot(epoch, a * np.array(epoch) + b, color='black')
+
+plt.xlabel('Epoch')
+plt.ylabel('L1 Loss')
+plt.show()
+#+end_src
+
+#+RESULTS:
+[[file:images/l1_loss.png]]
+
+#+begin_src jupyter-python :file images/ae_loss.png
+import matplotlib.pyplot as plt
+import numpy as np
+from external import load_losses
+
+losses = load_losses()
+
+epoch = losses[0]
+ae = losses[2]
+
+plt.scatter(epoch, ae, s=2.5)
+a, b = np.polyfit(epoch, ae, 1)
+plt.plot(epoch, a * np.array(epoch) + b, color='black')
+
+plt.xlabel('Epoch')
+plt.ylabel('Autoencoder Loss')
+plt.show()
+#+end_src
+
+#+RESULTS:
+[[file:images/ae_loss.png]]
+
+#+begin_src jupyter-python :file images/wasserstein_loss.png
+import matplotlib.pyplot as plt
+import numpy as np
+from external import load_losses
+
+losses = load_losses()
+
+epoch = losses[0]
+wgan_g = losses[3]
+wgan_d = losses[4]
+
+plt.scatter(epoch, wgan_g, label='Wasserstein Generator Loss', s=2.5)
+plt.scatter(epoch, wgan_d, label='Wasserstein Discriminator Loss', s=2.5)
+
+a, b = np.polyfit(epoch, wgan_g, 1)
+plt.plot(epoch, a * np.array(epoch) + b, color='black')
+
+a, b = np.polyfit(epoch, wgan_d, 1)
+plt.plot(epoch, a * np.array(epoch) + b, color='black')
+
+plt.xlabel('Epoch')
+plt.ylabel('Wasserstein Distance')
+
+plt.legend()
+plt.show()
+#+end_src
+
+#+RESULTS:
+[[file:images/wasserstein_loss.png]]
 
 * Description of the final product
 

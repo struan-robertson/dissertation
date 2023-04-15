@@ -1,4 +1,4 @@
-% Created 2023-04-13 Thu 04:15
+% Created 2023-04-15 Sat 02:42
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org896f3b8}
+\label{sec:org42968f7}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -105,9 +105,9 @@ This papers implements a GAN inpainting network based on the structure described
 The final challenge of DEM reliability may be passed by this network, however this is difficult to test as GANs excel at infilling \emph{plausible} data, yet the \emph{accuracy} of this data may not be necessarily sufficient.
 
 \section{Background}
-\label{sec:org6615f34}
+\label{sec:org14c843c}
 \subsection{Digital Elevation Maps}
-\label{sec:org7428e97}
+\label{sec:org7c703fd}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -153,7 +153,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org40f8c3a}
+\label{sec:org3806a1c}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -176,8 +176,13 @@ A positive weight indicates that when the first neuron has a high activation so 
 Each neuron also holds a value called a bias, which can be thought of as the minimum weighted sum for the neuron to activate.
 To compute the activation of a second layer neuron, take the sum of the activations of the first layer neurons multiplied with their weights and add the bias (Equation \ref{eqn:activation}).
 The activation can be any number, however to normalise the signal between a range and add non-linearity to the network the activation is passed through an activation function.
-Leaky ReLU (Rectified Linear Unit) (Figure \ref{fig:LeakyReLU}) is an activation function which can introduce sparsity into the network, meaning only a subset of neurons will be activated for any given input, which can reduce the networks complexity and improve its computational efficiency.
-The normal ReLU function can can completely deactivate neurons, causing data loss.
+
+ReLU (Rectified Linear Unit) is an activation function which can introduce sparsity into the network, meaning only a subset of neurons will be activated for any given input.
+The constant gradient of ReLU when the gradient is positive improves the stability of gradients in the network, making vanishing gradients less likely than other activation functions, such as sigmoid.
+ReLU introduces sparsity in the activations since it outputs zero for negative input values.
+Whilst this can simplify the network and reduce computational complexity, it can also lead to the "dying ReLU" problem, where some neurons in the network stop contributing to the output due to always receiving negative input values and having an output of zero.
+Leaky ReLU (Figure \ref{fig:LeakyReLU}) introduces a small slope for negative input values, ensuring all neurons in the network can contribute to the output even if their inputs are negative.
+This can improve the performance of the network when dealing with noisy or outlier data, which is very common in DEMs.
 For this reason Leaky ReLU was used in the network described by this paper.
 
 \begin{equation}
@@ -188,8 +193,9 @@ a^{(1)}_0 = LeakyReLU(w_{0,0}a^{(0)}_0 + w_{0,1}a^{(0)}_1 + \cdots + w_{0,n}a^{(
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.9\linewidth]{images/LeakyReLU.png}
-\caption{\label{fig:LeakyReLU}Leaky ReLU activation function with negative slope of 0.1\autocite{LeakyReLUPyTorchDocumentation}}
+\caption{\label{fig:LeakyReLU}Leaky ReLU activation function with negative slope of 0.1}
 \end{figure}
+
 
 As the equations are linear, to efficiently compute the activation of every neuron in a forward layer, the equations can be stacked into matrices\autocite{3Blue1BrownWhatNeural} :
 \begin{equation}
@@ -214,7 +220,7 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:org24d37ab}
+\label{sec:org24db9db}
 
 \begin{figure}[htbp]
 \centering
@@ -267,7 +273,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org434cfac}
+\label{sec:org908a3c0}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -308,33 +314,45 @@ The fully-convolutional nature of the contextual attention layer results in it b
 \end{figure}
 
 \subsection{Poisson Blending}
-\label{sec:org81c2cbe}
+\label{sec:org131e5a8}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \section{Specification}
-\label{sec:org157bd4d}
+\label{sec:org20a89cb}
 
 \section{Design}
-\label{sec:orgbfd83cd}
+\label{sec:org751c7d0}
 
 \section{Implementation and Testing}
-\label{sec:orga2b12ae}
+\label{sec:org907615b}
 
 \section{Evaluation / Testing}
-\label{sec:orge1aa761}
+\label{sec:org1a8b520}
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{images/l1_loss.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{images/ae_loss.png}
+\end{center}
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{images/wasserstein_loss.png}
+\end{center}
 
 \section{Description of the final product}
-\label{sec:org7e7ced4}
+\label{sec:org0d48ef5}
 
 \section{Appraisal}
-\label{sec:org9626ff5}
+\label{sec:org5bd60a9}
 
 \section{Summary and Conclusions}
-\label{sec:org0c0c747}
+\label{sec:orgc2a7d03}
 
 \section{Future Work}
-\label{sec:org59f012e}
+\label{sec:orgdb5fdcd}
 
 \section*{Acknowledgements}
 
