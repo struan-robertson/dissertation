@@ -377,6 +377,9 @@ Include Contextual Attention layer
 #+ATTR_LATEX: :float multicolumn
 [[file:images/gan_architecture.png]]
 
+#+ATTR_LATEX: :float multicolumn
+[[file:images/critic_architecture.png]]
+
 *** Deep Generational Model Loss Functions
 Maybe swap ReLU here
 ** Unified Inpainting Network
