@@ -98,7 +98,6 @@ The final challenge of DEM reliability may be passed by this network, however th
 * Background
 ** Digital Elevation Maps
 
-
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure [[fig:apollo_17]]).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
 The cells of a DEM can also be described as pixels, as they represent a discrete location in a raster grid.
@@ -350,11 +349,34 @@ The fully-convolutional nature of the contextual attention layer results in it b
 
 ** Related Work
 
+/A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps/ by Park and Choi[cite:@parkNeuralProcessApproach2021] is the most relevant paper to this report, as it also attempts to solve the issue of lunar DEM void reconstruction.
+They use a sparse attentive neural processes (SANPs) (a novel version of attentive neural processes[cite:@kimAttentiveNeuralProcesses2019]) to reduce complexity and prevent over-fitting.
+This works on a similar concept to the contextual attention layer proposed by Yu /et al./[cite:@yuGenerativeImageInpainting2018] and used in the current paper; training the network to identify regions in the input image that are more or less important for the infilling task.
+Due to being fully convolutional in nature, contextual attention layers are likely more effective at improving void infilling GANs, with strong inpainting results described by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
+A problem of void infilling GANs is that whilst a trained GAN produces plausible output data, it is impossible to asses the data accuracy, severely hampering the ability to use this data in future scientific missions.
+To overcome this issue, Park and Choi[cite:@parkNeuralProcessApproach2021] implement uncertainty analysis in their void filling network.
+This produces uncertainty maps of infilled regions, which indicate how confident the network is of each pixel.
+Whilst the network proposed in the current paper likely produces more accurate void infilling results than Park and Choi[cite:@parkNeuralProcessApproach2021], due to the use of contextual attention and slope data, uncertainty maps make infilled data more useful in real life applications.
+In future work, uncertainty analysis could be implemented in the network described in this paper.
+
+[cite:@zhangVoidFillingBased2020]
+
+[cite:@dongFillingVoidsElevation2020]
+
+[cite:@stolzleReconstructingOccludedElevation2022]
+
+[cite:@qiuVoidFillingDigital2019]
+
+
 * Methodology
 **  Problem Formation and Notation
 ** Deep Generational Model
 *** Deep Generational Model Structure
 Include Contextual Attention layer
+
+#+ATTR_LATEX: :float multicolumn
+[[file:images/gan_architecture.png]]
+
 *** Deep Generational Model Loss Functions
 Maybe swap ReLU here
 ** Unified Inpainting Network
@@ -370,6 +392,7 @@ In this paper, the technique of poisson seamless cloning[cite:@perezPoissonImage
 ** Model Training
 Talk about all the changes made to the network
 ** Model Testing Methodology
+
 
 * Results
 

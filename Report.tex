@@ -1,4 +1,4 @@
-% Created 2023-04-15 Sat 04:06
+% Created 2023-04-16 Sun 22:52
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:orge3d08d5}
+\label{sec:orgacae7f1}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -106,10 +106,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:org20df199}
+\label{sec:org2cb02b8}
 \subsection{Digital Elevation Maps}
-\label{sec:org3dd3ec2}
-
+\label{sec:orgeb86bd2}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -154,7 +153,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org5b74b23}
+\label{sec:org1e99b77}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -221,7 +220,7 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:org64dfabe}
+\label{sec:orgf4de1d3}
 
 \begin{figure}[htbp]
 \centering
@@ -274,7 +273,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org00a7fca}
+\label{sec:org44ead61}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -315,43 +314,69 @@ The fully-convolutional nature of the contextual attention layer results in it b
 \end{figure}
 
 \subsection{Related Work}
-\label{sec:org725bf10}
+\label{sec:org062f7bf}
+
+\emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant paper to this report, as it also attempts to solve the issue of lunar DEM void reconstruction.
+They use a sparse attentive neural processes (SANPs) (a novel version of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
+This works on a similar concept to the contextual attention layer proposed by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018} and used in the current paper; training the network to identify regions in the input image that are more or less important for the infilling task.
+Due to being fully convolutional in nature, contextual attention layers are likely more effective at improving void infilling GANs, with strong inpainting results described by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018}.
+A problem of void infilling GANs is that whilst a trained GAN produces plausible output data, it is impossible to asses the data accuracy, severely hampering the ability to use this data in future scientific missions.
+To overcome this issue, Park and Choi\autocite{parkNeuralProcessApproach2021} implement uncertainty analysis in their void filling network.
+This produces uncertainty maps of infilled regions, which indicate how confident the network is of each pixel.
+Whilst the network proposed in the current paper likely produces more accurate void infilling results than Park and Choi\autocite{parkNeuralProcessApproach2021}, due to the use of contextual attention and slope data, uncertainty maps make infilled data more useful in real life applications.
+In future work, uncertainty analysis could be implemented in the network described in this paper.
+
+\autocite{zhangVoidFillingBased2020}
+
+\autocite{dongFillingVoidsElevation2020}
+
+\autocite{stolzleReconstructingOccludedElevation2022}
+
+\autocite{qiuVoidFillingDigital2019}
+
 
 \section{Methodology}
-\label{sec:org2932d0c}
+\label{sec:org763ea67}
 \subsection{Problem Formation and Notation}
-\label{sec:org2ffa704}
+\label{sec:org767bd09}
 \subsection{Deep Generational Model}
-\label{sec:orgdfc0f0a}
+\label{sec:org4c4f9c3}
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org67721b8}
+\label{sec:org0d35520}
 Include Contextual Attention layer
+
+\begin{figure*}
+\centering
+\includegraphics[width=.9\linewidth]{images/gan_architecture.png}
+\end{figure*}
+
 \subsubsection{Deep Generational Model Loss Functions}
-\label{sec:orgdcdab5b}
+\label{sec:org74742d0}
 Maybe swap ReLU here
 \subsection{Unified Inpainting Network}
-\label{sec:org6eeea6f}
+\label{sec:org8035ffc}
 \subsection{Data Post-processing}
-\label{sec:org0acb362}
+\label{sec:org50be76c}
 \subsubsection{Poisson Blending}
-\label{sec:orgd94d18d}
+\label{sec:org3a0ee2d}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:orgca4f7f0}
+\label{sec:orgaab03ae}
 
 
 \section{Experiments}
-\label{sec:org44b292e}
+\label{sec:orgfd5a03b}
 \subsection{Model Training}
-\label{sec:orgbc1c08f}
+\label{sec:orgce5d545}
 Talk about all the changes made to the network
 \subsection{Model Testing Methodology}
-\label{sec:org421a83f}
+\label{sec:orgdc04437}
+
 
 \section{Results}
-\label{sec:orgfc87e00}
+\label{sec:org6318aa4}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
@@ -367,13 +392,13 @@ Talk about all the changes made to the network
 
 
 \section{Discussion}
-\label{sec:orga98866e}
+\label{sec:org02c4c47}
 
 \section{Conclusion}
-\label{sec:org8ae04d9}
+\label{sec:org61a2526}
 
 \section{Future Work}
-\label{sec:org2efe131}
+\label{sec:org291e078}
 
 \section*{Acknowledgements}
 
