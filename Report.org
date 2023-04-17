@@ -205,45 +205,52 @@ The activation can be any number, however to normalise the signal between a rang
 
 ReLU (Rectified Linear Unit) is an activation function which can introduce sparsity into the network, meaning only a subset of neurons will be activated for any given input.
 The constant gradient of ReLU when the gradient is positive improves the stability of gradients in the network, making vanishing gradients less likely than other activation functions, such as sigmoid.
-ReLU introduces sparsity in the activations since it outputs zero for negative input values.
+ReLU also introduces sparsity in the activations since it outputs zero for negative input values.
 Whilst this can simplify the network and reduce computational complexity, it can also lead to the "dying ReLU" problem, where some neurons in the network stop contributing to the output due to always receiving negative input values and having an output of zero.
-Leaky ReLU (Figure [[fig:LeakyReLU]]) introduces a small slope for negative input values, ensuring all neurons in the network can contribute to the output even if their inputs are negative.
+The ELU activation function (Figure [[fig:ELU]]) becomes smooth slowly until its output equals $-\alpha$ for negative inputs, ensuring all neurons in the network can contribute to the output even if their inputs are negative.
 This can improve the performance of the network when dealing with noisy or outlier data, which is very common in DEMs.
-For this reason Leaky ReLU was used in the network described by this paper.
+For this reason ELU is the most common activation function in the network described by this paper.
+Other activation functions used are Leaky ReLU and Tanh.
+Leaky ReLU also addresses the dying ReLU problem, however instead of a smooth curve to $-\alpha$, negative values have a small constant negative slope equal to $\alpha$ (usually 0.1).
+Leaky ReLU is used in the discriminator of this the network described by this paper as it allows the activation to be infinitely small.
+In generative networks such as the generator, this can lead to vanishing gradients, however in classifier networks such as the discriminator it is important for it to be able to learn negative associations.
+The Tanh activation function compresses all activations to between -1 and 1, and so is used as the final layer in generative networks to produce output data of the same range as the input data.
 
 #+NAME: eqn:activation
 \begin{equation}
-a^{(1)}_0 = LeakyReLU(w_{0,0}a^{(0)}_0 + w_{0,1}a^{(0)}_1 + \cdots + w_{0,n}a^{(0)}_n + b_0)
+a^{(1)}_0 = ELU(w_{0,0}a^{(0)}_0 + w_{0,1}a^{(0)}_1 + \cdots + w_{0,n}a^{(0)}_n + b_0)
 \end{equation}
 
-#+NAME: LeakyReLU
-#+begin_src jupyter-python :file images/LeakyReLU.png
+#+NAME: ELU
+#+begin_src jupyter-python :file images/ELU.png
 import matplotlib.pyplot as plt
 import numpy as np
 
-def leaky_relu(x, alpha=0.1):
-    return np.where(x > 0, x, alpha * x)
+def elu(x, alpha=1):
+    return x if x >= 0 else alpha * (np.exp(x) - 1)
 
-x = np.linspace(-6, 6, 1000)
-y = leaky_relu(x)
+inputs = np.linspace(-8, 8, 1000)
+outputs = [elu(x) for x in inputs]
 
-plt.plot(x, y)
+plt.plot(inputs, outputs)
 plt.xlabel('Input')
 plt.ylabel('Output')
-plt.title('Leaky ReLU Function (α=0.1)')
+plt.title('ELU Function (α=1)')
+plt.axhline(0, color='black', linewidth=.5)
+plt.axvline(0, color='black', linewidth=.5)
 plt.grid()
 plt.show()
 #+end_src
 
-#+CAPTION: Leaky ReLU activation function with negative slope of 0.1
-#+NAME: fig:LeakyReLU
-#+RESULTS: LeakyReLU
-[[file:images/LeakyReLU.png]]
+#+CAPTION: ELU activation function
+#+NAME: fig:ELU
+#+RESULTS: ELU
+[[file:images/ELU.png]]
 
 
 As the equations are linear, to efficiently compute the activation of every neuron in a forward layer, the equations can be stacked into matrices[cite:@3Blue1BrownWhatNeural] :
 \begin{equation}
-\begin{bmatrix} a^{(1)}_0 \\ a^{(1)}_1 \\ \vdots \\ a_n^{(1)} \end{bmatrix} = LeakyReLU \left( \begin{bmatrix}w_{0,0} & w_{0,1} & \dots & w_{0,n} \\ w_{1,0} & w_{1,1} & \dots & w_{1,n} \\ \vdots & \vdots & \ddots & \vdots \\ w_{k,0} & w_{k,1} & \dots & w_{k,n} \end{bmatrix} \begin{bmatrix} a_0^{(0)} \\ a_1^{(0)} \\ \vdots \\ a_n^{(0)} \end{bmatrix} + \begin{bmatrix} b_0 \\ b_1 \\ \vdots \\ b_n \end{bmatrix} \right)
+\begin{bmatrix} a^{(1)}_0 \\ a^{(1)}_1 \\ \vdots \\ a_n^{(1)} \end{bmatrix} = ELU \left( \begin{bmatrix}w_{0,0} & w_{0,1} & \dots & w_{0,n} \\ w_{1,0} & w_{1,1} & \dots & w_{1,n} \\ \vdots & \vdots & \ddots & \vdots \\ w_{k,0} & w_{k,1} & \dots & w_{k,n} \end{bmatrix} \begin{bmatrix} a_0^{(0)} \\ a_1^{(0)} \\ \vdots \\ a_n^{(0)} \end{bmatrix} + \begin{bmatrix} b_0 \\ b_1 \\ \vdots \\ b_n \end{bmatrix} \right)
 \end{equation}
 
 A cost function such as Mean Squared Error (MSE) is used to measure how well the network is performing.
@@ -259,6 +266,7 @@ The network can become stuck in a local minimum, as it is impossible to know wha
 An analogy for this would be rolling a ball down a hill.
 
 As calculating the gradient for the entire dataset is very computationally difficult, the data is batched, with the cost function calculated for each example in a batch and then averaged to get a single cost value for the batch - which is then backpropagated.
+This average is important, as the ideal adjustment to weights and biases will be different for each piece of input data, so by averaging the cost function of each a generalised value is reached.
 An epoch is the entire set of training data. It normally takes multiple epochs of training data for the network to converge at a set of weights that minimise the cost function.
 
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
@@ -287,7 +295,6 @@ This is a fundamental pattern in a CNN, as it allows for kernels to learn to ext
 By reducing the spatial dimensions of the image, earlier layers extract low level features which get combined by following layers (Figure [[fig:convolution_filter]]).
 The compression of the input data also allows for later kernels to extract patterns from an area much larger than their kernel size .
 Dilated convolutions expand the kernel by inserting holes between its elements, allowing the kernel to cover a larger area than its size[cite:@dumoulinGuideConvolutionArithmetic2018].
-In combination with the compression of input data in latent space, dilated convolutions in latent space can allow the network to learn complex and large features for little computational cost.
 
 
 #+CAPTION: Simplified diagram of an autoencoder[cite:@birlaAutoencoders2019]
@@ -296,15 +303,15 @@ In combination with the compression of input data in latent space, dilated convo
 
 *Autoencoders*
 
-Autoencoders are comprised of convolutional layers which manipulate spatial dimensions and the number of channels.
-Autoencoders feature an encoder and decoder (Figure [[fig:autoencoder]]).
+Autoencoders construct an encoder and decoder out of convolutional layers, using the change in channel number and spatial dimensions to learn to deconstruct then reconstruction data (Figure [[fig:autoencoder]]).
 The encoder is trained to reduce the spatial dimensions of the input data whilst increasing the number of channels.
 The latent space is the result of this encoding, a lower-dimensional compressed representation of the data.
 In a trained network, the latent space captures the most important features and patterns of the input data in a compact and efficient way[cite:@michelucciIntroductionAutoencoders2022].
 This representation is generalised, two different craters would be represented as craters, even if they had visual differences.
 Autoencoders are useful for image inpainting as the latent space more clearly demonstrates the missing parts of features.
+Dilated convolutions are especially effective in latent space, as the kernel acts over a larger area of the already compressed data for little computational cost, allowing it to learn complex and large features.
 The decoder is trained to translate the latent space back into the inpainted image.
-A famous use of autoencoders is in "deepfake" networks which swap faces in images.
+A famous use of autoencoders is in early "deepfake" networks, which are designed to swap faces in images.
 In a deepfake network, separate autoencoders are trained for the two faces.
 By swapping the decoder from one autoencoder into another, the autoencoder encodes properties (such face angle) for one face, however decodes the image with the other face.
 
@@ -318,9 +325,8 @@ The adversarial loss between the competing networks is able to catch errors whic
 A difficult challenge of training GANs is keeping the training of both generator and discriminator balanced.
 If one network becomes substantially better than the other, the gradient for the better network will explode and the other networks gradient will vanish.
 Wasserstein GANs[cite:@arjovskyWassersteinGenerativeAdversarial2017] improve this situation by using the Wasserstein-1 distance to measure discrepancy between real and generated data distributions.
-The Wasserstein-1 distance is a measure of how much effort it would take to move one probability density into another.
-The continuous nature of the Wasserstein-1 distance leads to more stable gradients.
-To further improve the stability of the network, gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates.
+The Wasserstein-1 distance is a measure of how much effort it would take to move one probability density into another, which is continuous in nature, leading to more stable gradients.
+To further improve the stability of the network, a gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates.
 If one trains faster than the other, the gradient descent is penalised to allow the other to close the gap.
 
 A GAN containing only convolutional layers is referred to as a deep convolutional GAN[cite:@radfordUnsupervisedRepresentationLearning2016].
@@ -333,30 +339,31 @@ This is because data is known to be real or generated, and so the loss function 
 As training neural networks requires large amounts of data, unsupervised training requires far less human effort to achieve.
 GANs are well suited for the task of void infilling, as the adversarial loss results in the generator being trained to generate the accurate DEMs, without the need of manually labeling voids locations.
 
+#+CAPTION:Contextual attention focusing network on cat [cite:@zhangAgileAmuletRealTime2018]
+#+NAME: fig:contextual_attention
+[[file:images/contextual_attention.png]]
+
 *Contextual Attention*
 
 Image features are extracted in convolutional neural networks with local kernels layer by layer.
 This locality reduces the kernels effectiveness at borrowing from distant spatial locations; there may be many layers of convolutions reducing image spatial dimensions before data from other parts of the image become relevant to a kernel.
 Yu et al.[cite:@yuGenerativeImageInpainting2018] proposed a novel contextual attention layer in the deep generative network to remedy this issue.
 This layer learns where to copy feature information from in the known background (non-masked part of the image) to generate missing patches (Figure [[fig:contextual_attention]]).
-This concept is inspired by human attention, people selectively attend to specific aspects of the the environment based on their relevance or saliency.
+This concept is inspired by human attention, people selectively attend to specific aspects of the the environment based on relevance or saliency.
 As the layer is differentiable it can be trained, improving the efficiency of the network as a whole.
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
-#+CAPTION:Contextual attention focusing network on cat [cite:@zhangAgileAmuletRealTime2018]
-#+NAME: fig:contextual_attention
-[[file:images/contextual_attention.png]]
-
 ** Related Work
 
-/A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps/ by Park and Choi[cite:@parkNeuralProcessApproach2021] is the most relevant paper to this report, as it also attempts to solve the issue of lunar DEM void reconstruction.
-They use a sparse attentive neural processes (SANPs) (a novel version of attentive neural processes[cite:@kimAttentiveNeuralProcesses2019]) to reduce complexity and prevent over-fitting.
+/A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps/ by Park and Choi[cite:@parkNeuralProcessApproach2021] is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
+They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes[cite:@kimAttentiveNeuralProcesses2019]) to reduce complexity and prevent over-fitting.
 This works on a similar concept to the contextual attention layer proposed by Yu /et al./[cite:@yuGenerativeImageInpainting2018] and used in the current paper; training the network to identify regions in the input image that are more or less important for the infilling task.
 Due to being fully convolutional in nature, contextual attention layers are likely more effective at improving void infilling GANs, with strong inpainting results described by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
+
 A problem of void infilling GANs is that whilst a trained GAN produces plausible output data, it is impossible to asses the data accuracy, severely hampering the ability to use this data in future scientific missions.
 To overcome this issue, Park and Choi[cite:@parkNeuralProcessApproach2021] implement uncertainty analysis in their void filling network.
 This produces uncertainty maps of infilled regions, which indicate how confident the network is of each pixel.
-Whilst the network proposed in the current paper likely produces more accurate void infilling results than Park and Choi[cite:@parkNeuralProcessApproach2021], due to the use of contextual attention and slope data, uncertainty maps make infilled data more useful in real life applications.
+Whilst the network proposed in the current paper likely produces more accurate void infilling results than Park and Choi[cite:@parkNeuralProcessApproach2021] - due to the use of contextual attention and slope data - uncertainty maps make infilled data more useful in real life applications.
 In future work, uncertainty analysis could be implemented in the network described in this paper.
 
 [cite:@zhangVoidFillingBased2020]
