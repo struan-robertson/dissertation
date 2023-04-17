@@ -91,7 +91,7 @@ Within the field of computer vision, the problem of image inpainting fundamental
 RGB images contain three channels whereas a DEM contains only one, however inpainting techniques process each channel independently and then combine the results, so inpainting a DEM is functionally identical to inpainting a greyscale image.
 Generative adversarial networks (GANs)[cite:@goodfellowGenerativeAdversarialNetworks2020] are a deep learning generative model that when constructed with deep convolutional neural networks[cite:@krizhevskyImageNetClassificationDeep2017] have been shown to have excellent performance in image inpainting[cite:@pathakContextEncodersFeature2016;@yuGenerativeImageInpainting2018] and have been successfully applied to the task of DEM void infilling[cite:@gavriilVoidFillingDigital2019;@zhangVoidFillingBased2020;@qiuVoidFillingDigital2019].
 
-This papers implements a GAN inpainting network based on the structure described by Yu /et al./[cite:@yuGenerativeImageInpainting2018] and shows it to effectively pass the first two challenges set forward by Park and Choi[cite:@parkNeuralProcessApproach2021].
+This papers implements a GAN inpainting network based on the structure described by Yu /et al./[cite:@yuGenerativeImageInpainting2018] and shows it to effectively pass the first two challenges set forward by Park and Choi.
 The final challenge of DEM reliability may be passed by this network, however this is difficult to test as GANs excel at infilling /plausible/ data, yet the /accuracy/ of this data may not be necessarily sufficient.
 
 
@@ -360,19 +360,20 @@ The fully-convolutional nature of the contextual attention layer results in it b
 /A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps/ by Park and Choi[cite:@parkNeuralProcessApproach2021] is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes[cite:@kimAttentiveNeuralProcesses2019]) to reduce complexity and prevent over-fitting.
 This works on a similar concept to the contextual attention layer proposed by Yu /et al./[cite:@yuGenerativeImageInpainting2018] and used in the current paper; training the network to identify regions in the input image that are more or less important for the infilling task.
-Due to being fully convolutional in nature, contextual attention layers are likely more effective at improving void infilling GANs, with strong inpainting results described by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
+Due to being fully convolutional in nature, contextual attention layers are likely more effective at improving void infilling GANs, with strong inpainting results described by Yu /et al./
 
 A problem of void infilling GANs is that whilst a trained GAN produces plausible output data, it is impossible to asses the data accuracy, severely hampering the ability to use this data in future scientific missions.
-To overcome this issue, Park and Choi[cite:@parkNeuralProcessApproach2021] implement uncertainty analysis in their void filling network.
+To overcome this issue, Park and Choi implement uncertainty analysis in their void filling network.
 This produces uncertainty maps of infilled regions, which indicate how confident the network is of each pixel.
-Whilst the network proposed in the current paper likely produces more accurate void infilling results than Park and Choi[cite:@parkNeuralProcessApproach2021] - due to the use of contextual attention and slope data - uncertainty maps make infilled data more useful in real life applications.
+Whilst the network proposed in the current paper likely produces more accurate void infilling results than Park and Choi - due to the use of contextual attention and slope data - uncertainty maps make infilled data more useful in real life applications.
 In future work, uncertainty analysis could be implemented in the network described in this paper.
 
-[cite:@zhangVoidFillingBased2020]
+[cite:@gavriilVoidFillingDigital2019]
+
+In /DEM Void Filling Based on Context Attention Generation Model/ by Zhang /et al./[cite:@zhangVoidFillingBased2020] they make the argument that the use of local feature extraction by Gavriil /et al./[cite:@gavriilVoidFillingDigital2019] has a negative impact on the networks ability to recover overall DEM semantic information.
+As both Zhang /et al./ and Gavrill /et al./ base their network structure on the inpainting GAN descrribed by Yu /et al./[cite:@yuGenerativeImageInpainting2018], this difference in opinion results in  
 
 [cite:@dongFillingVoidsElevation2020]
-
-[cite:@stolzleReconstructingOccludedElevation2022]
 
 [cite:@qiuVoidFillingDigital2019]
 
@@ -386,6 +387,8 @@ Look at the way[cite:@zhangVoidFillingBased2020] describes the stride and kernel
 Also has good formulas and a good algorithm
 
 [cite:@gulrajaniImprovedTrainingWasserstein2017] - gradient penalty
+
+[cite:@qiuVoidFillingDigital2019] good formulas
 
 #+ATTR_LATEX: :float multicolumn
 [[file:images/gan_architecture.png]]
@@ -459,11 +462,7 @@ plt.ylabel('Autoencoder Loss')
 plt.show()
 #+end_src
 
-#+RESULTS:
-[[file:images/ae_loss.png]]
-
 AE loss is the spatially discounted reconstruction loss[cite:@zhangVoidFillingBased2020]
-
 #+RESULTS:
 [[file:images/ae_loss.png]]
 
