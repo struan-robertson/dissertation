@@ -1,4 +1,4 @@
-% Created 2023-04-17 Mon 04:41
+% Created 2023-04-17 Mon 18:03
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org5d8a017}
+\label{sec:orgfad78a7}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -106,9 +106,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:org2c34d25}
+\label{sec:org9a45f74}
 \subsection{Digital Elevation Maps}
-\label{sec:org30b4795}
+\label{sec:orgf16ff8d}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -153,7 +153,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org0c5a5a6}
+\label{sec:org0d0dc2f}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -225,10 +225,46 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
-\textbf{Batch Normalisation} TODO
+\textbf{Batch Normalisation}
+
+Batch normalisation (BN) is an algorithmic method that can improve the speed and stability of deep neural network training.
+With increasing network depth in deep neural networks, large gradient updates can result in diverging loss and activations exploding, slowing network training\autocite{bjorckUnderstandingBatchNormalization2018} .
+Santurkar \emph{et al.}\autocite{santurkarHowDoesBatch2018} demonstrated that BN makes the optimisation landscape significantly smoother.
+This can help overcome sharp local minima and the predictive and stable behavior of the gradients allows for faster training.
+BN works by normalising activation vectors from the hidden layers using the mean and variance of the current batch.
+Some other normalisation methods worth noting are instance normalisation and region normalisation.
+Instance normalisation calculates the mean and variance for each individual input, rather than the entire batch.\autocite{ulyanovInstanceNormalizationMissing2017}
+Region normalisation is designed specifically for image inpainting tasks, with mean and variance calculated separately for pixels inside and outside the inpainted void.\autocite{yuRegionNormalizationImage2023}
+
+To apply batch normalisation, calculate for each hidden layer:
+\begin{equation}
+\label{eqn:mean}
+\mu = \frac{1}{n} \sum_{i}Z^{(i)}
+\end{equation}
+
+\begin{equation}
+\label{eqn:variance}
+\sigma^2 = \frac{1}{n} \sum_{i} (Z^{(i)} - \mu)^2
+\end{equation}
+
+\begin{equation}
+\label{eqn:bn normalise}
+Z^{(i)}_{norm} = \frac{Z^{(i)} - \mu}{\sqrt{\sigma^2 - \epsilon}}
+\end{equation}
+
+\begin{equation}
+\label{eqn:bn output}
+\hat{Z} = \gamma * Z^{(i)}_{norm} + \beta
+\end{equation}
+
+Determine the mean \(\mu\) (Equation \ref{eqn:mean}) and variance \(\sigma^2\) (Equation \ref{eqn:variance}) of the activation values accross the batch.
+Normalize the activation vector \(Z^{(i)}\) (Equation \ref{eqn:bn normalise}) so that each neurons output follows a standard normal distribution accross the batch, using \(\epsilon\) as a constant for numerical stability.
+Finally calculate the layers output \(\hat{Z^{(i)}}\) by applying a linear transformation with \(\gamma\) and \(\beta\) (Equation \ref{eqn:bn output}).
+\(\gamma\) and \(\beta\) are two trainable parameters, which allow the network to select the optimum distribution.
+\(\gamma\) adjusts the standard deviation and \(\beta\) adjusts the bias, shifting the curve to the right or left side.\autocite{huberBatchNormalizationLevels2022}
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:org822de9f}
+\label{sec:org48a1bba}
 
 \begin{figure}[htbp]
 \centering
@@ -280,7 +316,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org190452f}
+\label{sec:org715d56a}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -320,7 +356,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
 \subsection{Related Work}
-\label{sec:org1e54620}
+\label{sec:org054541e}
 
 \emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -344,14 +380,16 @@ As both Zhang \emph{et al.} and Gavrill \emph{et al.} base their network structu
 
 
 \section{Methodology}
-\label{sec:org209b613}
+\label{sec:org4e94d61}
 \subsection{Problem Formation and Notation}
-\label{sec:org4e86d18}
+\label{sec:orgcf021a8}
 \subsection{Deep Generational Model}
-\label{sec:org9187549}
+\label{sec:org9be6ea3}
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org5cf9317}
+\label{sec:org9b9c6fe}
 Look at the way\autocite{zhangVoidFillingBased2020} describes the stride and kernel size of the network.
+
+For obvious reasons read through\autocite{yuGenerativeImageInpainting2018}.
 
 Also has good formulas and a good algorithm
 
@@ -370,32 +408,32 @@ Also has good formulas and a good algorithm
 \end{figure*}
 
 \subsubsection{Deep Generational Model Loss Functions}
-\label{sec:org30a070f}
-Maybe swap ReLU here
+\label{sec:org483edf5}
+The coarse network is trained with reconstruction loss explicitly, while the refinement network is trained with reconstruction loss, global and local WGAN-GP adversarial loss.\autocite{yuGenerativeImageInpainting2018}
 \subsection{Unified Inpainting Network}
-\label{sec:orgfa98921}
+\label{sec:org3e837df}
 \subsection{Data Post-processing}
-\label{sec:org6a25500}
+\label{sec:orgf603b37}
 \subsubsection{Poisson Blending}
-\label{sec:org05cab2a}
+\label{sec:orgbe4a351}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:orgde71e95}
+\label{sec:org8296968}
 
 
 \section{Experiments}
-\label{sec:org29cf14d}
+\label{sec:org6c79095}
 \subsection{Model Training}
-\label{sec:org158b257}
+\label{sec:org2d7c91d}
 Talk about all the changes made to the network
 \subsection{Model Testing Methodology}
-\label{sec:org204c4b7}
+\label{sec:org9d729c6}
 
 
 \section{Results}
-\label{sec:org6928c93}
+\label{sec:org3936a68}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
@@ -412,13 +450,16 @@ AE loss is the spatially discounted reconstruction loss\autocite{zhangVoidFillin
 
 
 \section{Discussion}
-\label{sec:org1adc1d8}
+\label{sec:orga95bb57}
 
 \section{Conclusion}
-\label{sec:orgaf564bf}
+\label{sec:orga91458e}
 
 \section{Future Work}
-\label{sec:orgef4da1c}
+\label{sec:org75cc613}
+
+Uncertainty maps
+Maybe region normalisation?\autocite{yuRegionNormalizationImage2023}
 
 \section*{Acknowledgements}
 

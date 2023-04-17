@@ -271,7 +271,43 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
-*Batch Normalisation* TODO
+*Batch Normalisation*
+
+Batch normalisation (BN) is an algorithmic method that can improve the speed and stability of deep neural network training.
+With increasing network depth in deep neural networks, large gradient updates can result in diverging loss and activations exploding, slowing network training[cite:@bjorckUnderstandingBatchNormalization2018] .
+Santurkar /et al./[cite:@santurkarHowDoesBatch2018] demonstrated that BN makes the optimisation landscape significantly smoother.
+This can help overcome sharp local minima and the predictive and stable behavior of the gradients allows for faster training.
+BN works by normalising activation vectors from the hidden layers using the mean and variance of the current batch.
+Some other normalisation methods worth noting are instance normalisation and region normalisation.
+Instance normalisation calculates the mean and variance for each individual input, rather than the entire batch.[cite:@ulyanovInstanceNormalizationMissing2017]
+Region normalisation is designed specifically for image inpainting tasks, with mean and variance calculated separately for pixels inside and outside the inpainted void.[cite:@yuRegionNormalizationImage2023]
+
+To apply batch normalisation, calculate for each hidden layer:
+#+NAME: eqn:mean
+\begin{equation}
+\mu = \frac{1}{n} \sum_{i}Z^{(i)}
+\end{equation}
+
+#+NAME: eqn:variance
+\begin{equation}
+\sigma^2 = \frac{1}{n} \sum_{i} (Z^{(i)} - \mu)^2
+\end{equation}
+
+#+NAME: eqn:bn normalise
+\begin{equation}
+Z^{(i)}_{norm} = \frac{Z^{(i)} - \mu}{\sqrt{\sigma^2 - \epsilon}}
+\end{equation}
+
+#+NAME: eqn:bn output
+\begin{equation}
+\hat{Z} = \gamma * Z^{(i)}_{norm} + \beta
+\end{equation}
+
+Determine the mean $\mu$ (Equation [[eqn:mean]]) and variance $\sigma^2$ (Equation [[eqn:variance]]) of the activation values accross the batch.
+Normalize the activation vector $Z^{(i)}$ (Equation [[eqn:bn normalise]]) so that each neurons output follows a standard normal distribution accross the batch, using $\epsilon$ as a constant for numerical stability.
+Finally calculate the layers output $\hat{Z^{(i)}}$ by applying a linear transformation with $\gamma$ and $\beta$ (Equation [[eqn:bn output]]).
+$\gamma$ and $\beta$ are two trainable parameters, which allow the network to select the optimum distribution.
+$\gamma$ adjusts the standard deviation and $\beta$ adjusts the bias, shifting the curve to the right or left side.[cite:@huberBatchNormalizationLevels2022]
 
 *** Convolutional Neural Networks
 
@@ -384,6 +420,8 @@ As both Zhang /et al./ and Gavrill /et al./ base their network structure on the 
 *** Deep Generational Model Structure
 Look at the way[cite:@zhangVoidFillingBased2020] describes the stride and kernel size of the network.
 
+For obvious reasons read through[cite:@yuGenerativeImageInpainting2018].
+
 Also has good formulas and a good algorithm
 
 [cite:@gulrajaniImprovedTrainingWasserstein2017] - gradient penalty
@@ -397,7 +435,7 @@ Also has good formulas and a good algorithm
 [[file:images/critic_architecture.png]]
 
 *** Deep Generational Model Loss Functions
-Maybe swap ReLU here
+The coarse network is trained with reconstruction loss explicitly, while the refinement network is trained with reconstruction loss, global and local WGAN-GP adversarial loss.[cite:@yuGenerativeImageInpainting2018]
 ** Unified Inpainting Network
 ** Data Post-processing
 *** Poisson Blending
@@ -502,6 +540,9 @@ plt.show()
 * Conclusion
 
 * Future Work
+
+Uncertainty maps
+Maybe region normalisation?[cite:@yuRegionNormalizationImage2023]
 
 #+LATEX: \section*{Acknowledgements}
 
