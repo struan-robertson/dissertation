@@ -271,6 +271,8 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
+*Batch Normalisation* TODO
+
 *** Convolutional Neural Networks
 
 #+CAPTION: Convolution step[cite:@ConvolutionalNeuralNetworks]
@@ -326,7 +328,7 @@ A difficult challenge of training GANs is keeping the training of both generator
 If one network becomes substantially better than the other, the gradient for the better network will explode and the other networks gradient will vanish.
 Wasserstein GANs[cite:@arjovskyWassersteinGenerativeAdversarial2017] improve this situation by using the Wasserstein-1 distance to measure discrepancy between real and generated data distributions.
 The Wasserstein-1 distance is a measure of how much effort it would take to move one probability density into another, which is continuous in nature, leading to more stable gradients.
-To further improve the stability of the network, a gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates.
+To further improve the stability of the network, a gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates[cite:@gulrajaniImprovedTrainingWasserstein2017].
 If one trains faster than the other, the gradient descent is penalised to allow the other to close the gap.
 
 A GAN containing only convolutional layers is referred to as a deep convolutional GAN[cite:@radfordUnsupervisedRepresentationLearning2016].
@@ -379,7 +381,11 @@ In future work, uncertainty analysis could be implemented in the network describ
 **  Problem Formation and Notation
 ** Deep Generational Model
 *** Deep Generational Model Structure
-Include Contextual Attention layer
+Look at the way[cite:@zhangVoidFillingBased2020] describes the stride and kernel size of the network.
+
+Also has good formulas and a good algorithm
+
+[cite:@gulrajaniImprovedTrainingWasserstein2017] - gradient penalty
 
 #+ATTR_LATEX: :float multicolumn
 [[file:images/gan_architecture.png]]
@@ -432,20 +438,31 @@ plt.show()
 import matplotlib.pyplot as plt
 import numpy as np
 from external import load_losses
+from scipy.interpolate import make_interp_spline
 
 losses = load_losses()
 
-epoch = losses[0]
-ae = losses[2]
+epoch = np.array(losses[0])
+ae = np.array(losses[2])
+
+p = np.polyfit(epoch, ae, 17)
+
+x_fine = np.linspace(epoch.min(), epoch.max(), 100)
+y_fine = np.polyval(p, x_fine)
 
 plt.scatter(epoch, ae, s=2.5)
-a, b = np.polyfit(epoch, ae, 1)
-plt.plot(epoch, a * np.array(epoch) + b, color='black')
+
+plt.plot(x_fine, y_fine, color='black')
 
 plt.xlabel('Epoch')
 plt.ylabel('Autoencoder Loss')
 plt.show()
 #+end_src
+
+#+RESULTS:
+[[file:images/ae_loss.png]]
+
+AE loss is the spatially discounted reconstruction loss[cite:@zhangVoidFillingBased2020]
 
 #+RESULTS:
 [[file:images/ae_loss.png]]

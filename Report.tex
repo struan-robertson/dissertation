@@ -1,4 +1,4 @@
-% Created 2023-04-17 Mon 01:28
+% Created 2023-04-17 Mon 02:36
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org032fed4}
+\label{sec:org8900d0b}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -106,9 +106,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:orga1501de}
+\label{sec:org30a68e1}
 \subsection{Digital Elevation Maps}
-\label{sec:org184ddb7}
+\label{sec:org0a54a20}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -153,7 +153,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:orgf094601}
+\label{sec:orge1d5366}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -225,8 +225,10 @@ An epoch is the entire set of training data. It normally takes multiple epochs o
 
 A deep neural network is functionally the same, however it involves more hidden layers than the classical network described above.
 
+\textbf{Batch Normalisation} TODO
+
 \subsubsection{Convolutional Neural Networks}
-\label{sec:orgd55e259}
+\label{sec:org72f4b33}
 
 \begin{figure}[htbp]
 \centering
@@ -278,7 +280,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org67115ab}
+\label{sec:org56b395e}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -288,7 +290,7 @@ A difficult challenge of training GANs is keeping the training of both generator
 If one network becomes substantially better than the other, the gradient for the better network will explode and the other networks gradient will vanish.
 Wasserstein GANs\autocite{arjovskyWassersteinGenerativeAdversarial2017} improve this situation by using the Wasserstein-1 distance to measure discrepancy between real and generated data distributions.
 The Wasserstein-1 distance is a measure of how much effort it would take to move one probability density into another, which is continuous in nature, leading to more stable gradients.
-To further improve the stability of the network, a gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates.
+To further improve the stability of the network, a gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates\autocite{gulrajaniImprovedTrainingWasserstein2017}.
 If one trains faster than the other, the gradient descent is penalised to allow the other to close the gap.
 
 A GAN containing only convolutional layers is referred to as a deep convolutional GAN\autocite{radfordUnsupervisedRepresentationLearning2016}.
@@ -318,7 +320,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
 \subsection{Related Work}
-\label{sec:org5aca946}
+\label{sec:orge00bbd5}
 
 \emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -341,14 +343,18 @@ In future work, uncertainty analysis could be implemented in the network describ
 
 
 \section{Methodology}
-\label{sec:org1df5822}
+\label{sec:org4ba03d8}
 \subsection{Problem Formation and Notation}
-\label{sec:orgee731a0}
+\label{sec:org569a296}
 \subsection{Deep Generational Model}
-\label{sec:orgb00e462}
+\label{sec:org91d7c7b}
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org9e7d63d}
-Include Contextual Attention layer
+\label{sec:org81c447c}
+Look at the way\autocite{zhangVoidFillingBased2020} describes the stride and kernel size of the network.
+
+Also has good formulas and a good algorithm
+
+\autocite{gulrajaniImprovedTrainingWasserstein2017} - gradient penalty
 
 \begin{figure*}
 \centering
@@ -361,36 +367,42 @@ Include Contextual Attention layer
 \end{figure*}
 
 \subsubsection{Deep Generational Model Loss Functions}
-\label{sec:orgbae8d5f}
+\label{sec:orgc9a5ff5}
 Maybe swap ReLU here
 \subsection{Unified Inpainting Network}
-\label{sec:orgfcdb655}
+\label{sec:org924b163}
 \subsection{Data Post-processing}
-\label{sec:org6e8f869}
+\label{sec:orgd18a594}
 \subsubsection{Poisson Blending}
-\label{sec:org593c01f}
+\label{sec:org3a73f9d}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:org10dd9c2}
+\label{sec:org7edb6d1}
 
 
 \section{Experiments}
-\label{sec:orgfd2243b}
+\label{sec:org796ef59}
 \subsection{Model Training}
-\label{sec:org0ab24b0}
+\label{sec:orga5816db}
 Talk about all the changes made to the network
 \subsection{Model Testing Methodology}
-\label{sec:org78b96c6}
+\label{sec:org096f1e7}
 
 
 \section{Results}
-\label{sec:orge96b853}
+\label{sec:org1507c81}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
 \end{center}
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{images/ae_loss.png}
+\end{center}
+
+AE loss is the spatially discounted reconstruction loss\autocite{zhangVoidFillingBased2020}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/ae_loss.png}
@@ -402,13 +414,13 @@ Talk about all the changes made to the network
 
 
 \section{Discussion}
-\label{sec:org481fca1}
+\label{sec:orgc56a026}
 
 \section{Conclusion}
-\label{sec:org2798c98}
+\label{sec:orgf6ec5fd}
 
 \section{Future Work}
-\label{sec:orgce6c18c}
+\label{sec:org91aa311}
 
 \section*{Acknowledgements}
 
