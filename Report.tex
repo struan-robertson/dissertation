@@ -1,4 +1,4 @@
-% Created 2023-04-18 Tue 01:40
+% Created 2023-04-18 Tue 04:23
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -25,6 +25,8 @@
 \usepackage{titling}
 \usepackage[left=3cm,right=2cm,top=2.5cm,bottom=2cm]{geometry}
 \usepackage[british]{babel}
+\usepackage{placeins}
+\usepackage{stfloats}
 \usepackage{sectsty}
 \sectionfont{\Large}
 \subsectionfont{\large}
@@ -73,7 +75,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org1061d6a}
+\label{sec:org29d3106}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -106,9 +108,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:org84c1425}
+\label{sec:org6b529cc}
 \subsection{Digital Elevation Maps}
-\label{sec:orgf853fdf}
+\label{sec:orgcce7958}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -153,7 +155,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org23ee638}
+\label{sec:orgaaab990}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -264,7 +266,7 @@ Finally calculate the layers output \(\hat{Z^{(i)}}\) by applying a linear trans
 \(\gamma\) adjusts the standard deviation and \(\beta\) adjusts the bias, shifting the curve to the right or left side.\autocite{huberBatchNormalizationLevels2022}
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:org78a921b}
+\label{sec:orgfb63969}
 
 \begin{figure}[htbp]
 \centering
@@ -316,7 +318,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org9b23a71}
+\label{sec:orga01aa4b}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -356,7 +358,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
 \subsection{Related Work}
-\label{sec:orgc9c5333}
+\label{sec:org2b7e5e9}
 
 \emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -409,16 +411,68 @@ This technique could be applied to the network described in the current paper, a
 Gavriil \emph{et al.}, Zhang \emph{et al.}, Dong \emph{et al.} and Qui \emph{et al.} all trained their respective networks on DEM data from the Earth.
 Whilst this means that the trained models would not be effective at lunar void infilling, lunar and earth DEM data is functionally the same and so the same network architecture could be used for lunar void infilling if trained on lunar DEMs.
 
-
 \section{Methodology}
-\label{sec:orgbf9de64}
+\label{sec:orgd25c069}
 
 \subsection{Problem Formation and Notation}
-\label{sec:org9aae4dd}
+\label{sec:org2b5335c}
+
+Due to the similar nature of the problem being solved, the problem notation has been adapted from Gavriil \emph{et al.}\autocite{gavriilVoidFillingDigital2019}.
+DEMs in both GeoTiff, PDS3 and PDS4 will be considered, in all of which data forms a grid with a single height value for every position \((i, j)\).
+Let \(D = (d_p) \in \mathbb{R}^{m \times n}\) be a partial matrix of elevation values, where \(p\) is an abbreviation for pixel referring to the coordinates \((i,j)\) of a point on the DEM grid and \(d_p\) is the corresponding height value.
+Also let \(S = (s_p) \in \mathbb{R}^{m \times n}\) be a partial matrix of the slope values of \(D\), where \(s_p\) is the corresponding slope at pixel \(p\).
+Partial meaning that some pixel values are considered void.
+A binary matrix \(M = (m_p) \in 0,1^{m \times n}\) acts as a mask representing the void regions of \(D\) and \(S\).
+We refer to pixels \(p\) for which \(m_p = 0\) as \emph{known}, and \emph{unknown} otherwise.
+
+\textbf{Problem}: Given an initial partial elevation model \(D^0\), slope of the elevation model \(S^0\), construct a complete elevation model \(D\) with semantically plausible generated values for the masked regions.
+
+\subsection{Data Pre-Processing}
+\label{sec:org368d588}
+
 \subsection{Deep Generational Model}
-\label{sec:orge35f821}
+\label{sec:org54afdc4}
 \subsubsection{Deep Generational Model Structure}
-\label{sec:orgd0901f0}
+\label{sec:org9c6b8c2}
+
+\begin{figure*}
+\centering
+\includegraphics[width=.9\linewidth]{images/gan_architecture.png}
+\caption{\label{fig:generator}Generator Architecure}
+\end{figure*}
+
+\begin{table*}[htbp]
+\caption{\label{table:convolutions}Details of network convolutions, (K)ernel, (S)tride, (C)hannels, (P)adding}
+\centering
+\begin{tabular}{rllll}
+Layer & Coarse Generator & Fine Generator & Contextual Attention (CA) & Discriminators\\[0pt]
+\hline
+1 & K5,S1,C32,P2 & K5,S1,C32,P2 & K5,S1,C32,P2 & K4,S2,C64,P1\\[0pt]
+2 & K3,S2,C64,P1 & K3,S2,C32,P1 & K3,S2,C32,P1 & K4,S2,C128,P1\\[0pt]
+3 & K3,S1,C64,P1 & K3,S1,C64,P1 & K3,S1,C64,P1 & K4,S2,C256,P1\\[0pt]
+4 & K3,S2,C64,P1 & K3,S2,C64,P1 & K3,S2,C128,P1 & K4,S2,C256,P1\\[0pt]
+5 & K3,S1,C128,P1 & K3,S1,C128,P1 & K3,S1,C128,P1 & Fully connected to 1\\[0pt]
+6 & K3,S1,C128,P1 & K3,S1,C128,P1 & K3,S1,C128,P1 & \\[0pt]
+7 & K3,D2,S1,C128,P2 & K3,D2,S1,C128,P2 & K3,S1,C128,P1 & \\[0pt]
+8 & K3,D4,S1,C128,P4 & K3,D4,S1,C128,P4 & CA Layer & \\[0pt]
+9 & K3,D8,S1,C128,P8 & K3,D8,S1,C128,P8 & K3,S1,C128,P1 & \\[0pt]
+10 & K3,D16,S1,C128,P16 & K3,D16,S1,C128,P16 & K3,S1,C128,P1 & \\[0pt]
+11 & K3,S1,C128,P1 & Join with CA layer & Join with Fine Generator & \\[0pt]
+12 & K3,S1,C128,P1 & K3,S1,C128,P1 &  & \\[0pt]
+13 & Resize (2x) & K3,S1,C128,P1 &  & \\[0pt]
+14 & K3,S1,C64,P1 & Resize (2x) &  & \\[0pt]
+15 & K3,S1,C64,P1 & K3,S1,C64,P1 &  & \\[0pt]
+16 & Resize (2x) & K3,S1,C64,P1 &  & \\[0pt]
+17 & K3,S1,C32,P1 & Resize (2x) &  & \\[0pt]
+18 & K3,S1,C16,P1 & K3,S1,C32,P1 &  & \\[0pt]
+19 & K3,S1,C2,P1 & K3,S1,C16,P1 &  & \\[0pt]
+20 & K5,S1,C2,P2 & K3,S1,C2,P1 &  & \\[0pt]
+21 &  & K7,S1,C2,P3 &  & \\[0pt]
+\end{tabular}
+\end{table*}
+
+
+
 Look at the way\autocite{zhangVoidFillingBased2020} describes the stride and kernel size of the network.
 
 For obvious reasons read through\autocite{yuGenerativeImageInpainting2018}.
@@ -429,43 +483,41 @@ Also has good formulas and a good algorithm
 
 \autocite{qiuVoidFillingDigital2019} good formulas
 
-\begin{figure*}
-\centering
-\includegraphics[width=.9\linewidth]{images/gan_architecture.png}
-\end{figure*}
 
-\begin{figure*}
+
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=.9\linewidth]{images/critic_architecture.png}
-\end{figure*}
+\caption{\label{fig:discriminator}Discriminator Architecure}
+\end{figure}
 
 \subsubsection{Deep Generational Model Loss Functions}
-\label{sec:orgd70f46f}
+\label{sec:orgc2a2714}
 The coarse network is trained with reconstruction loss explicitly, while the refinement network is trained with reconstruction loss, global and local WGAN-GP adversarial loss.\autocite{yuGenerativeImageInpainting2018}
 \subsection{Unified Inpainting Network}
-\label{sec:org25d09b4}
+\label{sec:org596cee7}
 \subsection{Data Post-processing}
-\label{sec:orgf9b8a1d}
+\label{sec:org32404be}
 \subsubsection{Poisson Blending}
-\label{sec:org022432b}
+\label{sec:orgadb1567}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:org1d6b296}
+\label{sec:org7278914}
 
 
 \section{Experiments}
-\label{sec:orga555902}
+\label{sec:org01728c7}
 \subsection{Model Training}
-\label{sec:org5b7d34d}
+\label{sec:org438f2ae}
 Talk about all the changes made to the network
 \subsection{Model Testing Methodology}
-\label{sec:orgb9bddff}
+\label{sec:org4337d11}
 
 
 \section{Results}
-\label{sec:org4cce4a6}
+\label{sec:org8c5b4ee}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
@@ -482,13 +534,13 @@ AE loss is the spatially discounted reconstruction loss\autocite{zhangVoidFillin
 
 
 \section{Discussion}
-\label{sec:org9e5926c}
+\label{sec:orgc81d601}
 
 \section{Conclusion}
-\label{sec:org487d6df}
+\label{sec:orgef7b508}
 
 \section{Future Work}
-\label{sec:org669b0d5}
+\label{sec:orgcc18560}
 
 Uncertainty maps
 Maybe region normalisation?\autocite{yuRegionNormalizationImage2023}

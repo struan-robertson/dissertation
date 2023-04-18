@@ -25,6 +25,8 @@
 #+LaTeX_HEADER: \usepackage{titling}
 #+LaTeX_HEADER: \usepackage[left=3cm,right=2cm,top=2.5cm,bottom=2cm]{geometry}
 #+LaTeX_HEADER: \usepackage[british]{babel}
+#+LATEX_HEADER: \usepackage{placeins}
+#+LATEX_HEADER: \usepackage{stfloats}
 
 # Font sizes
 #+LaTeX_HEADER: \usepackage{sectsty}
@@ -445,9 +447,61 @@ Gavriil /et al./, Zhang /et al./, Dong /et al./ and Qui /et al./ all trained the
 Whilst this means that the trained models would not be effective at lunar void infilling, lunar and earth DEM data is functionally the same and so the same network architecture could be used for lunar void infilling if trained on lunar DEMs.
 
 * Methodology
+
 **  Problem Formation and Notation
+
+Due to the similar nature of the problem being solved, the problem notation has been adapted from Gavriil /et al./[cite:@gavriilVoidFillingDigital2019].
+DEMs in both GeoTiff, PDS3 and PDS4 will be considered, in all of which data forms a grid with a single height value for every position $(i, j)$.
+Let $D = (d_p) \in \mathbb{R}^{m \times n}$ be a partial matrix of elevation values, where $p$ is an abbreviation for pixel referring to the coordinates $(i,j)$ of a point on the DEM grid and $d_p$ is the corresponding height value.
+Also let $S = (s_p) \in \mathbb{R}^{m \times n}$ be a partial matrix of the slope values of $D$, where $s_p$ is the corresponding slope at pixel $p$.
+Partial meaning that some pixel values are considered void.
+A binary matrix $M = (m_p) \in 0,1^{m \times n}$ acts as a mask representing the void regions of $D$ and $S$.
+We refer to pixels $p$ for which $m_p = 0$ as /known/, and /unknown/ otherwise.
+
+*Problem*: Given an initial partial elevation model $D^0$, slope of the elevation model $S^0$, construct a complete elevation model $D$ with semantically plausible generated values for the masked regions.
+
+** Data Pre-Processing
+To train the network, large quantities of high quality DEM data are required.
+Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
+Instead, LROC
+
 ** Deep Generational Model
 *** Deep Generational Model Structure
+
+#+CAPTION: Generator Architecure
+#+NAME: fig:generator
+#+ATTR_LATEX: :float multicolumn
+[[file:images/gan_architecture.png]]
+
+#+CAPTION: Details of network convolutions, (K)ernel, (S)tride, (C)hannels, (P)adding
+#+NAME: table:convolutions
+#+ATTR_LATEX: :float multicolumn
+| Layer | Coarse Generator   | Fine Generator     | Contextual Attention (CA) | Discriminators       |
+|-------+--------------------+--------------------+---------------------------+----------------------|
+|     1 | K5,S1,C32,P2       | K5,S1,C32,P2       | K5,S1,C32,P2              | K4,S2,C64,P1         |
+|     2 | K3,S2,C64,P1       | K3,S2,C32,P1       | K3,S2,C32,P1              | K4,S2,C128,P1        |
+|     3 | K3,S1,C64,P1       | K3,S1,C64,P1       | K3,S1,C64,P1              | K4,S2,C256,P1        |
+|     4 | K3,S2,C64,P1       | K3,S2,C64,P1       | K3,S2,C128,P1             | K4,S2,C256,P1        |
+|     5 | K3,S1,C128,P1      | K3,S1,C128,P1      | K3,S1,C128,P1             | Fully connected to 1 |
+|     6 | K3,S1,C128,P1      | K3,S1,C128,P1      | K3,S1,C128,P1             |                      |
+|     7 | K3,D2,S1,C128,P2   | K3,D2,S1,C128,P2   | K3,S1,C128,P1             |                      |
+|     8 | K3,D4,S1,C128,P4   | K3,D4,S1,C128,P4   | CA Layer                  |                      |
+|     9 | K3,D8,S1,C128,P8   | K3,D8,S1,C128,P8   | K3,S1,C128,P1             |                      |
+|    10 | K3,D16,S1,C128,P16 | K3,D16,S1,C128,P16 | K3,S1,C128,P1             |                      |
+|    11 | K3,S1,C128,P1      | Join with CA layer | Join with Fine Generator  |                      |
+|    12 | K3,S1,C128,P1      | K3,S1,C128,P1      |                           |                      |
+|    13 | Resize (2x)        | K3,S1,C128,P1      |                           |                      |
+|    14 | K3,S1,C64,P1       | Resize (2x)        |                           |                      |
+|    15 | K3,S1,C64,P1       | K3,S1,C64,P1       |                           |                      |
+|    16 | Resize (2x)        | K3,S1,C64,P1       |                           |                      |
+|    17 | K3,S1,C32,P1       | Resize (2x)        |                           |                      |
+|    18 | K3,S1,C16,P1       | K3,S1,C32,P1       |                           |                      |
+|    19 | K3,S1,C2,P1        | K3,S1,C16,P1       |                           |                      |
+|    20 | K5,S1,C2,P2        | K3,S1,C2,P1        |                           |                      |
+|    21 |                    | K7,S1,C2,P3        |                           |                      |
+
+
+
 Look at the way[cite:@zhangVoidFillingBased2020] describes the stride and kernel size of the network.
 
 For obvious reasons read through[cite:@yuGenerativeImageInpainting2018].
@@ -458,10 +512,10 @@ Also has good formulas and a good algorithm
 
 [cite:@qiuVoidFillingDigital2019] good formulas
 
-#+ATTR_LATEX: :float multicolumn
-[[file:images/gan_architecture.png]]
 
-#+ATTR_LATEX: :float multicolumn
+
+#+CAPTION: Discriminator Architecure
+#+NAME: fig:discriminator
 [[file:images/critic_architecture.png]]
 
 *** Deep Generational Model Loss Functions
