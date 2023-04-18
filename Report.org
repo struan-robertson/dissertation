@@ -417,7 +417,6 @@ Zhang /et al./ also based their network architecture on the inpainting GAN descr
 For void boundary post-processing,  Zhang /et al./ used bilateral filtering, however poisson blending is more appropriate as DEM gradient information is preserved, whereas bilateral filtering is a lossy smoothing algorithm and so important data may be lost in the process.
 The network also does not include the slope of the DEMs, so whilst it is built on the same network architecture as the current paper, it is likely less effective at preserving DEM texture.
 
-
 /Filling Voids in Elevation Models Using a Shadow-Constrained Convolutional Neural Network/ by Dong /et al./[cite:@dongFillingVoidsElevation2020] introduces an additional loss function to train the network to adhere to geometric constraints implied by cast shadows.
 This is achieved by extracting shadow maps from satellite imagery of the DEM location, which in combination with known sun directions are used to compute a shadow-based supervisory signal.
 Whilst this may be an effective technique on earth, the requirement of cast shadows on the Moon poses an issue, as half of the moon is in permanent darkness.

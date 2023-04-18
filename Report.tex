@@ -1,4 +1,4 @@
-% Created 2023-04-17 Mon 23:27
+% Created 2023-04-18 Tue 01:23
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org8a55ad4}
+\label{sec:org89c9cb1}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -106,9 +106,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:org5abc13d}
+\label{sec:org4eb31e7}
 \subsection{Digital Elevation Maps}
-\label{sec:org75e5ffb}
+\label{sec:orgb3d99cb}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -153,7 +153,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:orgc4d4cbf}
+\label{sec:org5c0a833}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -264,7 +264,7 @@ Finally calculate the layers output \(\hat{Z^{(i)}}\) by applying a linear trans
 \(\gamma\) adjusts the standard deviation and \(\beta\) adjusts the bias, shifting the curve to the right or left side.\autocite{huberBatchNormalizationLevels2022}
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:org9430467}
+\label{sec:orga8dd23f}
 
 \begin{figure}[htbp]
 \centering
@@ -316,7 +316,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org93340dc}
+\label{sec:orgb535cd3}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -356,7 +356,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
 \subsection{Related Work}
-\label{sec:org5d68723}
+\label{sec:org74b4c6d}
 
 \emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -381,7 +381,6 @@ In \emph{DEM Void Filling Based on Context Attention Generation Model} Zhang \em
 Zhang \emph{et al.} also based their network architecture on the inpainting GAN described by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018}, with the difference in opinion resulting in Zhang \emph{et al.} using an un-modified version of the network.
 For void boundary post-processing,  Zhang \emph{et al.} used bilateral filtering, however poisson blending is more appropriate as DEM gradient information is preserved, whereas bilateral filtering is a lossy smoothing algorithm and so important data may be lost in the process.
 The network also does not include the slope of the DEMs, so whilst it is built on the same network architecture as the current paper, it is likely less effective at preserving DEM texture.
-
 
 \emph{Filling Voids in Elevation Models Using a Shadow-Constrained Convolutional Neural Network} by Dong \emph{et al.}\autocite{dongFillingVoidsElevation2020} introduces an additional loss function to train the network to adhere to geometric constraints implied by cast shadows.
 This is achieved by extracting shadow maps from satellite imagery of the DEM location, which in combination with known sun directions are used to compute a shadow-based supervisory signal.
@@ -410,14 +409,16 @@ This technique could be applied to the network described in the current paper, a
 Gavriil \emph{et al.}, Zhang \emph{et al.}, Dong \emph{et al.} and Qui \emph{et al.} all trained their respective networks on DEM data from the Earth.
 Whilst this means that the trained models would not be effective at lunar void infilling, lunar and earth DEM data is functionally the same and so the same network architecture could be used for lunar void infilling if trained on lunar DEMs.
 
+
 \section{Methodology}
-\label{sec:org5d42579}
+\label{sec:org196c3f2}
+
 \subsection{Problem Formation and Notation}
-\label{sec:orgcbf3904}
+\label{sec:org9c81284}
 \subsection{Deep Generational Model}
-\label{sec:org94ae796}
+\label{sec:org2d6d1c9}
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org958ec43}
+\label{sec:org1c8d4be}
 Look at the way\autocite{zhangVoidFillingBased2020} describes the stride and kernel size of the network.
 
 For obvious reasons read through\autocite{yuGenerativeImageInpainting2018}.
@@ -439,32 +440,32 @@ Also has good formulas and a good algorithm
 \end{figure*}
 
 \subsubsection{Deep Generational Model Loss Functions}
-\label{sec:org4dc1977}
+\label{sec:orgdf75b1b}
 The coarse network is trained with reconstruction loss explicitly, while the refinement network is trained with reconstruction loss, global and local WGAN-GP adversarial loss.\autocite{yuGenerativeImageInpainting2018}
 \subsection{Unified Inpainting Network}
-\label{sec:orga59eb86}
+\label{sec:orgf275b60}
 \subsection{Data Post-processing}
-\label{sec:org961996e}
+\label{sec:orga495487}
 \subsubsection{Poisson Blending}
-\label{sec:org1da2b04}
+\label{sec:org1aa2ece}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:org829cd35}
+\label{sec:orga052bc4}
 
 
 \section{Experiments}
-\label{sec:orgb7683e4}
+\label{sec:orga4ce8a6}
 \subsection{Model Training}
-\label{sec:org82a7380}
+\label{sec:orgbd603fd}
 Talk about all the changes made to the network
 \subsection{Model Testing Methodology}
-\label{sec:org442381c}
+\label{sec:org26be3de}
 
 
 \section{Results}
-\label{sec:org49b7107}
+\label{sec:org76c1a2c}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
@@ -481,13 +482,13 @@ AE loss is the spatially discounted reconstruction loss\autocite{zhangVoidFillin
 
 
 \section{Discussion}
-\label{sec:org594c82c}
+\label{sec:orgaca5578}
 
 \section{Conclusion}
-\label{sec:org4dc52f3}
+\label{sec:org9af929f}
 
 \section{Future Work}
-\label{sec:org854bc2c}
+\label{sec:org8e4a054}
 
 Uncertainty maps
 Maybe region normalisation?\autocite{yuRegionNormalizationImage2023}
