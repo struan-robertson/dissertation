@@ -1,4 +1,4 @@
-% Created 2023-04-18 Tue 01:23
+% Created 2023-04-18 Tue 01:40
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -73,7 +73,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org89c9cb1}
+\label{sec:org1061d6a}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -106,9 +106,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:org4eb31e7}
+\label{sec:org84c1425}
 \subsection{Digital Elevation Maps}
-\label{sec:orgb3d99cb}
+\label{sec:orgf853fdf}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -153,7 +153,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org5c0a833}
+\label{sec:org23ee638}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -264,7 +264,7 @@ Finally calculate the layers output \(\hat{Z^{(i)}}\) by applying a linear trans
 \(\gamma\) adjusts the standard deviation and \(\beta\) adjusts the bias, shifting the curve to the right or left side.\autocite{huberBatchNormalizationLevels2022}
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:orga8dd23f}
+\label{sec:org78a921b}
 
 \begin{figure}[htbp]
 \centering
@@ -316,7 +316,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:orgb535cd3}
+\label{sec:org9b23a71}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -356,7 +356,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
 \subsection{Related Work}
-\label{sec:org74b4c6d}
+\label{sec:orgc9c5333}
 
 \emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -411,14 +411,14 @@ Whilst this means that the trained models would not be effective at lunar void i
 
 
 \section{Methodology}
-\label{sec:org196c3f2}
+\label{sec:orgbf9de64}
 
 \subsection{Problem Formation and Notation}
-\label{sec:org9c81284}
+\label{sec:org9aae4dd}
 \subsection{Deep Generational Model}
-\label{sec:org2d6d1c9}
+\label{sec:orge35f821}
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org1c8d4be}
+\label{sec:orgd0901f0}
 Look at the way\autocite{zhangVoidFillingBased2020} describes the stride and kernel size of the network.
 
 For obvious reasons read through\autocite{yuGenerativeImageInpainting2018}.
@@ -440,32 +440,32 @@ Also has good formulas and a good algorithm
 \end{figure*}
 
 \subsubsection{Deep Generational Model Loss Functions}
-\label{sec:orgdf75b1b}
+\label{sec:orgd70f46f}
 The coarse network is trained with reconstruction loss explicitly, while the refinement network is trained with reconstruction loss, global and local WGAN-GP adversarial loss.\autocite{yuGenerativeImageInpainting2018}
 \subsection{Unified Inpainting Network}
-\label{sec:orgf275b60}
+\label{sec:org25d09b4}
 \subsection{Data Post-processing}
-\label{sec:orga495487}
+\label{sec:orgf9b8a1d}
 \subsubsection{Poisson Blending}
-\label{sec:org1aa2ece}
+\label{sec:org022432b}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:orga052bc4}
+\label{sec:org1d6b296}
 
 
 \section{Experiments}
-\label{sec:orga4ce8a6}
+\label{sec:orga555902}
 \subsection{Model Training}
-\label{sec:orgbd603fd}
+\label{sec:org5b7d34d}
 Talk about all the changes made to the network
 \subsection{Model Testing Methodology}
-\label{sec:org26be3de}
+\label{sec:orgb9bddff}
 
 
 \section{Results}
-\label{sec:org76c1a2c}
+\label{sec:org4cce4a6}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
@@ -482,13 +482,13 @@ AE loss is the spatially discounted reconstruction loss\autocite{zhangVoidFillin
 
 
 \section{Discussion}
-\label{sec:orgaca5578}
+\label{sec:org9e5926c}
 
 \section{Conclusion}
-\label{sec:org9af929f}
+\label{sec:org487d6df}
 
 \section{Future Work}
-\label{sec:org8e4a054}
+\label{sec:org669b0d5}
 
 Uncertainty maps
 Maybe region normalisation?\autocite{yuRegionNormalizationImage2023}
