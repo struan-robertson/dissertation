@@ -26,7 +26,10 @@
 #+LaTeX_HEADER: \usepackage[left=3cm,right=2cm,top=2.5cm,bottom=2cm]{geometry}
 #+LaTeX_HEADER: \usepackage[british]{babel}
 #+LATEX_HEADER: \usepackage{placeins}
+
 #+LATEX_HEADER: \usepackage{stfloats}
+#+LATEX_HEADER: \usepackage[ruled, lined, linesnumbered, commentsnumbered, longend]{algorithm2e}
+#+LATEX_HEADER: \newcommand{\Mod}[1]{\ (\mathrm{mod}\ #1)}
 
 # Font sizes
 #+LaTeX_HEADER: \usepackage{sectsty}
@@ -163,7 +166,7 @@ plt.show()
 The slope of a DEM refers to the steepness of terrain at each location in the map (Figure [[fig:dem_and_slope]])
 Slope is calculated by traversing a 3 x 3 window (Figure [[fig:window]]) over the DEM[cite:@qiuVoidFillingDigital2019].
 The slope value at the central pixel /e/ can be calculated by using the algorithm proposed by Horn /et al./[cite:@hornHillShadingReflectance1981] :
-\begin{align}
+\begin{align}\label{eqn:slope}
 Slope &= arctan\sqrt{Slope^2_{we} + Slope^2_{sn}}, \\
 Slope_{we} &= \frac{(e_8 + 2e_1 + e_5) - (e_7 + 2e_3 + e_6)}{8 \times Gridsize}, \\
 Slope_{sn} &= \frac{(e_7 + 2e_4 + e_8) - (e_6 + 2e_2 + e_5)}{8 \times Gridsize},
@@ -446,6 +449,7 @@ This technique could be applied to the network described in the current paper, a
 Gavriil /et al./, Zhang /et al./, Dong /et al./ and Qui /et al./ all trained their respective networks on DEM data from the Earth.
 Whilst this means that the trained models would not be effective at lunar void infilling, lunar and earth DEM data is functionally the same and so the same network architecture could be used for lunar void infilling if trained on lunar DEMs.
 
+
 * Methodology
 
 **  Problem Formation and Notation
@@ -456,14 +460,109 @@ Let $D = (d_p) \in \mathbb{R}^{m \times n}$ be a partial matrix of elevation val
 Also let $S = (s_p) \in \mathbb{R}^{m \times n}$ be a partial matrix of the slope values of $D$, where $s_p$ is the corresponding slope at pixel $p$.
 Partial meaning that some pixel values are considered void.
 A binary matrix $M = (m_p) \in 0,1^{m \times n}$ acts as a mask representing the void regions of $D$ and $S$.
-We refer to pixels $p$ for which $m_p = 0$ as /known/, and /unknown/ otherwise.
+We refer to pixels $p$ for which $m_p = 1$ as /known/, and /unknown/ otherwise.
 
 *Problem*: Given an initial partial elevation model $D^0$, slope of the elevation model $S^0$, construct a complete elevation model $D$ with semantically plausible generated values for the masked regions.
 
+
 ** Data Pre-Processing
-To train the network, large quantities of high quality DEM data are required.
-Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
-Instead, LROC
+
+#+NAME: compression
+#+begin_src jupyter-python :file images/compression.png
+from osgeo import gdal
+import numpy as np
+import matplotlib.pyplot as plt
+
+file = "NAC_DTM_APOLLO17"
+
+compressed = gdal.Open(f"/home/struan/Development/Inpaint/Final Network/datac/{file}.TIF")
+uncompressed = gdal.Open(f"/home/struan/Development/Inpaint/Final Network/data/{file}.TIF")
+
+compressed = compressed.ReadAsArray()
+uncompressed = uncompressed.ReadAsArray()
+
+threshold = -10000
+uncompressed[uncompressed < threshold] = np.nan
+
+plt.figure(figsize=(8,10))
+plt.subplot(1,2,1)
+plt.imshow(uncompressed, cmap='terrain')
+plt.title("(a) Raw DEM")
+plt.axis('off')
+plt.subplot(1,2,2)
+plt.imshow(compressed, cmap='terrain')
+plt.title("(b) Compressed")
+plt.axis('off')
+plt.show()
+#+end_src
+
+#+CAPTION: DEM before and after tiling and removing null values
+#+NAME: fig:compression
+#+RESULTS: compression
+[[file:images/compression.png]]
+
+The python library GDAL[cite:@rouaultevenGDAL2023] was used for the loading and saving of DEM data from disk, which was then converted to NumPy[cite:@NumPy] arrays for pre-processing, before finally being converted into PyTorch[cite:@PyTorch] tensors for training.
+
+As DEMs are raster data, each pixel in a square grid must have a stored value, even if that value is null (Figure [[fig:compression]] (a)).
+The data is tiled into 256x256 tiles for use in network training (Algorithm \ref{alg:tiling}), with tiles containing null values discarded before training begins.
+This is memory inefficient and increases the data loading time before training can begin, however the main issue became apparent when uploading for cloud training, as this unnecessary data increases upload time and in tern cost.
+To remedy this issue, each DEM file was compressed by initially tiling and discarding tiles containing null values, then saving back to a GeoTiff (Figure [[fig:compression]] (b)).
+The compressed file can only ever be tiled at the same size as when it was initially compressed, however this suited the requirements of this paper and reduced the size of the 64 DEMs from 12.4GB to 8.1GB.
+
+\begin{algorithm}
+\DontPrintSemicolon
+
+\SetKwInOut{KwIn}{Input}
+\SetKwInOut{KwOut}{Output}
+
+\caption{Tiling Algorithm}
+\label{alg:tiling}
+
+\KwIn{2D array of DEM elevation values $D[1..m][1..n]$, $tileHeight$, $tileWidth$}
+\KwOut{3D array of DEM tiles}
+
+\uIf{$m \Mod{tileHeight} \neq 0$}{
+    $newHeight \gets m - (m \Mod{tileHeight})$ \;
+    $D \gets D[:newHeight]$ \tcp*[f]{Array slicing}\;
+}
+\ElseIf{$n \Mod{tileWidth} \neq 0$}{
+    $newWidth \gets n - (n \Mod{tileWidth})$ \;
+    $D \gets D[:][:newWidth]$ \tcp*[f]{Array slicing}\;
+}
+
+$tilesHigh \gets \lfloor\frac{m}{tileHight}\rfloor$ \;
+$tilesWide \gets \lfloor\frac{n}{tileWidth}\rfloor$ \;
+
+$tiledArray \gets D.reshape(tilesHigh, tileHight, tilesWide, tileWidth)$  \tcp*[f]{Reshape array dimensions}\;
+$tiledArray \gets tiledArray.swapaxes(1,2)$ \;
+
+$tiledArray \gets tiledArray.reshape(tilesHigh * tilesWide, tileHight, tileWidth)$ \;
+
+\KwRet{$tiledArray$}
+
+\end{algorithm}
+
+Each DEM file contained within the data directory is loaded with GDAL, converted into a NumPy array and then tiled using Algorithm \ref{alg:tiling}.
+The slope of each tile was calculated using the NumPy ~gradient~ function, which used the same formula as Equation \ref{eqn:slope},whilst being written in C instead of python so improving pre-processing speeds by a considerable margin.
+
+It is important for input data into a neural network to be normalised for a number of reasons.
+In the context of DEMs, pixels with a greater elevation value would cause greater activations in the input layer of the network, so an input tile at the top of a hill would be weighted greater than one at the bottom of a crater.
+There is also theoretically no limit to the elevation value of a pixel, and so this massive potential range in training data values makes it very difficult for the network to learn patterns.
+Data normalisation solves this issue by normalising all input data individually to between a certain range.
+The range for the network described in this paper is between -1 and 1, as the network outputs data in the same range and so by storing the minimum and maximum values of a DEM tile, the tile can be de-normalised after infilling.
+It is important to note that for a tile, elevation values and slope values must be normalised independently of each other.
+For each tile, data is normalised using the following equation:
+
+Let $T$ be a matrix with values equal to the DEM tile of size $m \times n$
+\begin{equation}\label{eq:normalise}
+normalised = 2\left(\frac{T - min(T)}{max(T) - min(T)}\right) - 1
+\end{equation}
+
+After each file has been tiled, slope calculated and then normalised, it is appended to a linked list and then the next file is processed.
+Once the final tile has been processed, all tiled DEM arrays in the linked list are combined into one large NumPy array.
+While this is very memory inefficient, as twice the memory is required whilst the data is copied into the NumPy array, the alternative would require calculating the tiled size of each DEM before processing and then copying into a pre-allocated NumPy array, which was not within the scope of this project.
+This array is then converted to a PyTorch tensor, however this is computationally very cheap as both use the same representation of n-dimensional arrays in memory and so does not involve copying.
+A threading pool was originally implemented to increase the speed of pre-processing, as most of work is handled by external C libraries which are not limited by the fact that only one python thread can execute bytecode at a time but despite success in reducing loading times, the issue of pre-processing memory usage became considerably worse and the idea had to be abandoned.
 
 ** Deep Generational Model
 *** Deep Generational Model Structure
@@ -532,6 +631,11 @@ In this paper, the technique of poisson seamless cloning[cite:@perezPoissonImage
 * Experiments
 ** Model Training
 Talk about all the changes made to the network
+
+To train the network, large quantities of high quality DEM data is required.
+Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
+NAC DEMs were found to be of much higher quality at similar and greater resolutions.
+64 NAC DEMs[cite:@LROCRDRProduct] representing a variety of lunar terrain features were selected at random for the training set, with a further 32 selected for testing and validation purposes.
 ** Model Testing Methodology
 
 

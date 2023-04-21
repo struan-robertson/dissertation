@@ -1,4 +1,4 @@
-% Created 2023-04-18 Tue 04:23
+% Created 2023-04-21 Fri 22:44
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -27,6 +27,8 @@
 \usepackage[british]{babel}
 \usepackage{placeins}
 \usepackage{stfloats}
+\usepackage[ruled, lined, linesnumbered, commentsnumbered, longend]{algorithm2e}
+\newcommand{\Mod}[1]{\ (\mathrm{mod}\ #1)}
 \usepackage{sectsty}
 \sectionfont{\Large}
 \subsectionfont{\large}
@@ -75,7 +77,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org29d3106}
+\label{sec:org0c0b41a}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -108,9 +110,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:org6b529cc}
+\label{sec:orgc2ee754}
 \subsection{Digital Elevation Maps}
-\label{sec:orgcce7958}
+\label{sec:org2601fd4}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -133,7 +135,7 @@ Gridsize can vary depending on the source of data and the intended application, 
 The slope of a DEM refers to the steepness of terrain at each location in the map (Figure \ref{fig:dem_and_slope})
 Slope is calculated by traversing a 3 x 3 window (Figure \ref{fig:window}) over the DEM\autocite{qiuVoidFillingDigital2019}.
 The slope value at the central pixel \emph{e} can be calculated by using the algorithm proposed by Horn \emph{et al.}\autocite{hornHillShadingReflectance1981} :
-\begin{align}
+\begin{align}\label{eqn:slope}
 Slope &= arctan\sqrt{Slope^2_{we} + Slope^2_{sn}}, \\
 Slope_{we} &= \frac{(e_8 + 2e_1 + e_5) - (e_7 + 2e_3 + e_6)}{8 \times Gridsize}, \\
 Slope_{sn} &= \frac{(e_7 + 2e_4 + e_8) - (e_6 + 2e_2 + e_5)}{8 \times Gridsize},
@@ -155,7 +157,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:orgaaab990}
+\label{sec:org2e28bf0}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -266,7 +268,7 @@ Finally calculate the layers output \(\hat{Z^{(i)}}\) by applying a linear trans
 \(\gamma\) adjusts the standard deviation and \(\beta\) adjusts the bias, shifting the curve to the right or left side.\autocite{huberBatchNormalizationLevels2022}
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:orgfb63969}
+\label{sec:org04282c8}
 
 \begin{figure}[htbp]
 \centering
@@ -318,7 +320,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:orga01aa4b}
+\label{sec:org04a0417}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -358,7 +360,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
 \subsection{Related Work}
-\label{sec:org2b7e5e9}
+\label{sec:orgf3e1d1e}
 
 \emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -411,11 +413,12 @@ This technique could be applied to the network described in the current paper, a
 Gavriil \emph{et al.}, Zhang \emph{et al.}, Dong \emph{et al.} and Qui \emph{et al.} all trained their respective networks on DEM data from the Earth.
 Whilst this means that the trained models would not be effective at lunar void infilling, lunar and earth DEM data is functionally the same and so the same network architecture could be used for lunar void infilling if trained on lunar DEMs.
 
+
 \section{Methodology}
-\label{sec:orgd25c069}
+\label{sec:orge4d750e}
 
 \subsection{Problem Formation and Notation}
-\label{sec:org2b5335c}
+\label{sec:orgbf3cad9}
 
 Due to the similar nature of the problem being solved, the problem notation has been adapted from Gavriil \emph{et al.}\autocite{gavriilVoidFillingDigital2019}.
 DEMs in both GeoTiff, PDS3 and PDS4 will be considered, in all of which data forms a grid with a single height value for every position \((i, j)\).
@@ -423,17 +426,90 @@ Let \(D = (d_p) \in \mathbb{R}^{m \times n}\) be a partial matrix of elevation v
 Also let \(S = (s_p) \in \mathbb{R}^{m \times n}\) be a partial matrix of the slope values of \(D\), where \(s_p\) is the corresponding slope at pixel \(p\).
 Partial meaning that some pixel values are considered void.
 A binary matrix \(M = (m_p) \in 0,1^{m \times n}\) acts as a mask representing the void regions of \(D\) and \(S\).
-We refer to pixels \(p\) for which \(m_p = 0\) as \emph{known}, and \emph{unknown} otherwise.
+We refer to pixels \(p\) for which \(m_p = 1\) as \emph{known}, and \emph{unknown} otherwise.
 
 \textbf{Problem}: Given an initial partial elevation model \(D^0\), slope of the elevation model \(S^0\), construct a complete elevation model \(D\) with semantically plausible generated values for the masked regions.
 
+
 \subsection{Data Pre-Processing}
-\label{sec:org368d588}
+\label{sec:org7312928}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{images/compression.png}
+\caption{\label{fig:compression}DEM before and after tiling and removing null values}
+\end{figure}
+
+The python library GDAL\autocite{rouaultevenGDAL2023} was used for the loading and saving of DEM data from disk, which was then converted to NumPy\autocite{NumPy} arrays for pre-processing, before finally being converted into PyTorch\autocite{PyTorch} tensors for training.
+
+As DEMs are raster data, each pixel in a square grid must have a stored value, even if that value is null (Figure \ref{fig:compression} (a)).
+The data is tiled into 256x256 tiles for use in network training (Algorithm \ref{alg:tiling}), with tiles containing null values discarded before training begins.
+This is memory inefficient and increases the data loading time before training can begin, however the main issue became apparent when uploading for cloud training, as this unnecessary data increases upload time and in tern cost.
+To remedy this issue, each DEM file was compressed by initially tiling and discarding tiles containing null values, then saving back to a GeoTiff (Figure \ref{fig:compression} (b)).
+The compressed file can only ever be tiled at the same size as when it was initially compressed, however this suited the requirements of this paper and reduced the size of the 64 DEMs from 12.4GB to 8.1GB.
+
+\begin{algorithm}
+
+\DontPrintSemicolon
+
+\SetKwInOut{KwIn}{Input}
+\SetKwInOut{KwOut}{Output}
+
+\caption{Tiling Algorithm}
+\label{alg:tiling}
+
+\KwIn{2D array of DEM elevation values $D[1..m][1..n]$, $tileHeight$, $tileWidth$}
+\KwOut{3D array of DEM tiles}
+
+\uIf{$m \Mod{tileHeight} \neq 0$}{
+    $newHeight \gets m - (m \Mod{tileHeight})$ \;
+    $D \gets D[:newHeight]$ \tcp*[f]{Array slicing}\;
+}
+\ElseIf{$n \Mod{tileWidth} \neq 0$}{
+    $newWidth \gets n - (n \Mod{tileWidth})$ \;
+    $D \gets D[:][:newWidth]$ \tcp*[f]{Array slicing}\;
+}
+
+$tilesHigh \gets \lfloor\frac{m}{tileHight}\rfloor$ \;
+$tilesWide \gets \lfloor\frac{n}{tileWidth}\rfloor$ \;
+
+$tiledArray \gets D.reshape(tilesHigh, tileHight, tilesWide, tileWidth)$  \tcp*[f]{Reshape array dimensions}\;
+$tiledArray \gets tiledArray.swapaxes(1,2)$ \;
+
+$tiledArray \gets tiledArray.reshape(tilesHigh * tilesWide, tileHight, tileWidth)$ \;
+
+\KwRet{$tiledArray$}
+
+\end{algorithm}
+
+Each DEM file contained within the data directory is loaded with GDAL, converted into a NumPy array and then tiled using Algorithm \ref{alg:tiling}.
+The slope of each tile was calculated using the NumPy \texttt{gradient} function, which used the same formula as Equation \ref{eqn:slope},whilst being written in C instead of python so improving pre-processing speeds by a considerable margin.
+
+It is important for input data into a neural network to be normalised for a number of reasons.
+In the context of DEMs, pixels with a greater elevation value would cause greater activations in the input layer of the network, so an input tile at the top of a hill would be weighted greater than one at the bottom of a crater.
+There is also theoretically no limit to the elevation value of a pixel, and so this massive potential range in training data values makes it very difficult for the network to learn patterns.
+Data normalisation solves this issue by normalising all input data individually to between a certain range.
+The range for the network described in this paper is between -1 and 1, as the network outputs data in the same range and so by storing the minimum and maximum values of a DEM tile, the tile can be de-normalised after infilling.
+It is important to note that for a tile, elevation values and slope values must be normalised independently of each other.
+For each tile, data is normalised using the following equation:
+
+Let \(T\) be a matrix with values equal to the DEM tile of size \(m \times n\)
+\begin{equation}\label{eq:normalise}
+normalised = 2\left(\frac{T - min(T)}{max(T) - min(T)}\right) - 1
+\end{equation}
+
+After each file has been tiled, slope calculated and then normalised, it is appended to a linked list and then the next file is processed.
+Once the final tile has been processed, all tiled DEM arrays in the linked list are combined into one large NumPy array.
+While this is very memory inefficient, as twice the memory is required whilst the data is copied into the NumPy array, the alternative would require calculating the tiled size of each DEM before processing and then copying into a pre-allocated NumPy array, which was not within the scope of this project.
+The NumPy array is then converted to a PyTorch tensor, however this is computationally very cheap as both use the same representation of n-dimensional arrays in memory and so does not involve copying.
+
+A threading pool was originally implemented to increase the speed of pre-processing, as most of work is handled by external C libraries which are not limited by the fact that only one python thread can execute bytecode at a time.
+Despite success in reducing loading times, the issue of pre-processing memory usage became considerably worse and longer load times were judged to be preferable over higher memory usage.
 
 \subsection{Deep Generational Model}
-\label{sec:org54afdc4}
+\label{sec:orgfb49bda}
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org9c6b8c2}
+\label{sec:orgb45f42e}
 
 \begin{figure*}
 \centering
@@ -492,32 +568,37 @@ Also has good formulas and a good algorithm
 \end{figure}
 
 \subsubsection{Deep Generational Model Loss Functions}
-\label{sec:orgc2a2714}
+\label{sec:org40a4095}
 The coarse network is trained with reconstruction loss explicitly, while the refinement network is trained with reconstruction loss, global and local WGAN-GP adversarial loss.\autocite{yuGenerativeImageInpainting2018}
 \subsection{Unified Inpainting Network}
-\label{sec:org596cee7}
+\label{sec:org6a8ae1e}
 \subsection{Data Post-processing}
-\label{sec:org32404be}
+\label{sec:org33dd0d8}
 \subsubsection{Poisson Blending}
-\label{sec:orgadb1567}
+\label{sec:orgc79be57}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:org7278914}
+\label{sec:orgd151851}
 
 
 \section{Experiments}
-\label{sec:org01728c7}
+\label{sec:orge84743f}
 \subsection{Model Training}
-\label{sec:org438f2ae}
+\label{sec:org0222e8a}
 Talk about all the changes made to the network
+
+To train the network, large quantities of high quality DEM data is required.
+Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
+NAC DEMs were found to be of much higher quality at similar and greater resolutions.
+64 NAC DEMs\autocite{LROCRDRProduct} representing a variety of lunar terrain features were selected at random for the training set, with a further 32 selected for testing and validation purposes.
 \subsection{Model Testing Methodology}
-\label{sec:org4337d11}
+\label{sec:orgfb486db}
 
 
 \section{Results}
-\label{sec:org8c5b4ee}
+\label{sec:org9c45861}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
@@ -534,13 +615,13 @@ AE loss is the spatially discounted reconstruction loss\autocite{zhangVoidFillin
 
 
 \section{Discussion}
-\label{sec:orgc81d601}
+\label{sec:org2651acb}
 
 \section{Conclusion}
-\label{sec:orgef7b508}
+\label{sec:orgf61a4d1}
 
 \section{Future Work}
-\label{sec:orgcc18560}
+\label{sec:org8f2275d}
 
 Uncertainty maps
 Maybe region normalisation?\autocite{yuRegionNormalizationImage2023}
