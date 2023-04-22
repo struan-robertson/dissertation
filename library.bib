@@ -393,6 +393,24 @@
   file = {/home/struan/Zotero/storage/5JW7RG9W/Kim et al. - 2019 - Attentive Neural Processes.pdf;/home/struan/Zotero/storage/JDPYBAUY/1901.html}
 }
 
+@article{kongWhyDoesBatch2023,
+  title = {Why Does Batch Normalization Induce the Model Vulnerability on Adversarial Images?},
+  author = {Kong, Fei and Liu, Fangqi and Xu, Kaidi and Shi, Xiaoshuang},
+  year = {2023},
+  month = may,
+  journal = {World Wide Web},
+  volume = {26},
+  number = {3},
+  pages = {1073--1091},
+  issn = {1573-1413},
+  doi = {10.1007/s11280-022-01066-7},
+  urldate = {2023-04-22},
+  abstract = {Batch normalization is one of the most widely used components in deep neural networks. It can accelerate training, and boost model performance on normal samples. However, batch normalization induces vulnerability to models on adversarial examples, especially in medical images, and the reason is still not clear. In this paper, we aim to explain the vulnerability aroused by batch normalization under adversarial images. Specifically, we first discover that both natural and medical images contain a large number of trivial features, whose weights will be enlarged under adversarial attacks, and batch normalization can further enlarge their weights. Additionally, we find that batch normalization will reduce the inter-class margin of high-level features, leading to less tolerance to adversarial perturbations, thereby decreasing the model robustness. Moreover, we hypothesize that the smaller inter-class margin, the more difficult to attain the optimal classification space, which means batch normalization will restrict the performance of adversarial training. This further verifies that a narrower inter-class margin induced by batch normalization reduces the model robustness. Experiments on four benchmark datasets demonstrate our discovery, interpretation and hypothesis.},
+  langid = {english},
+  keywords = {Adversarial examples,Batch normalization,Interpretation,Model robustness},
+  file = {/home/struan/Zotero/storage/CVVCGDEF/Kong et al. - 2023 - Why does batch normalization induce the model vuln.pdf}
+}
+
 @article{krizhevskyImageNetClassificationDeep2017,
   title = {{{ImageNet}} Classification with Deep Convolutional Neural Networks},
   author = {Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E.},
@@ -855,6 +873,22 @@
   howpublished = {https://wandb.ai/ayush-thakur/dl-question-bank/reports/What-s-the-Optimal-Batch-Size-to-Train-a-Neural-Network---VmlldzoyMDkyNDU},
   langid = {english},
   file = {/home/struan/Zotero/storage/A9VKJJZW/What-s-the-Optimal-Batch-Size-to-Train-a-Neural-Network---VmlldzoyMDkyNDU.html}
+}
+
+@misc{xiangEffectsBatchWeight2017,
+  title = {On the {{Effects}} of {{Batch}} and {{Weight Normalization}} in {{Generative Adversarial Networks}}},
+  author = {Xiang, Sitao and Li, Hao},
+  year = {2017},
+  month = dec,
+  number = {arXiv:1704.03971},
+  eprint = {1704.03971},
+  primaryclass = {cs, stat},
+  publisher = {{arXiv}},
+  urldate = {2023-04-22},
+  abstract = {Generative adversarial networks (GANs) are highly effective unsupervised learning frameworks that can generate very sharp data, even for data such as images with complex, highly multimodal distributions. However GANs are known to be very hard to train, suffering from problems such as mode collapse and disturbing visual artifacts. Batch normalization (BN) techniques have been introduced to address the training. Though BN accelerates the training in the beginning, our experiments show that the use of BN can be unstable and negatively impact the quality of the trained model. The evaluation of BN and numerous other recent schemes for improving GAN training is hindered by the lack of an effective objective quality measure for GAN models. To address these issues, we first introduce a weight normalization (WN) approach for GAN training that significantly improves the stability, efficiency and the quality of the generated samples. To allow a methodical evaluation, we introduce squared Euclidean reconstruction error on a test set as a new objective measure, to assess training performance in terms of speed, stability, and quality of generated samples. Our experiments with a standard DCGAN architecture on commonly used datasets (CelebA, LSUN bedroom, and CIFAR-10) indicate that training using WN is generally superior to BN for GANs, achieving 10\% lower mean squared loss for reconstruction and significantly better qualitative results than BN. We further demonstrate the stability of WN on a 21-layer ResNet trained with the CelebA data set. The code for this paper is available at https://github.com/stormraiser/gan-weightnorm-resnet},
+  archiveprefix = {arxiv},
+  keywords = {Computer Science - Computer Vision and Pattern Recognition,Computer Science - Machine Learning,Statistics - Machine Learning},
+  file = {/home/struan/Zotero/storage/QT73M5R7/Xiang and Li - 2017 - On the Effects of Batch and Weight Normalization i.pdf;/home/struan/Zotero/storage/35QIEKIE/1704.html}
 }
 
 @inproceedings{yuFreeFormImageInpainting2019,

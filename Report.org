@@ -467,6 +467,8 @@ We refer to pixels $p$ for which $m_p = 1$ as /known/, and /unknown/ otherwise.
 
 ** Data Pre-Processing
 
+*Need to add a graph of data pipeline*
+
 #+NAME: compression
 #+begin_src jupyter-python :file images/compression.png
 from osgeo import gdal
@@ -510,6 +512,7 @@ To remedy this issue, each DEM file was compressed by initially tiling and disca
 The compressed file can only ever be tiled at the same size as when it was initially compressed, however this suited the requirements of this paper and reduced the size of the 64 DEMs from 12.4GB to 8.1GB.
 
 \begin{algorithm}
+
 \DontPrintSemicolon
 
 \SetKwInOut{KwIn}{Input}
@@ -533,7 +536,7 @@ The compressed file can only ever be tiled at the same size as when it was initi
 $tilesHigh \gets \lfloor\frac{m}{tileHight}\rfloor$ \;
 $tilesWide \gets \lfloor\frac{n}{tileWidth}\rfloor$ \;
 
-$tiledArray \gets D.reshape(tilesHigh, tileHight, tilesWide, tileWidth)$  \tcp*[f]{Reshape array dimensions}\;
+$tiledArray \gets D.reshape(tilesHigh, tileHight, tilesWide, tileWidth)$  \tcp*[f]{Change array stride}\;
 $tiledArray \gets tiledArray.swapaxes(1,2)$ \;
 
 $tiledArray \gets tiledArray.reshape(tilesHigh * tilesWide, tileHight, tileWidth)$ \;
@@ -561,16 +564,89 @@ normalised = 2\left(\frac{T - min(T)}{max(T) - min(T)}\right) - 1
 After each file has been tiled, slope calculated and then normalised, it is appended to a linked list and then the next file is processed.
 Once the final tile has been processed, all tiled DEM arrays in the linked list are combined into one large NumPy array.
 While this is very memory inefficient, as twice the memory is required whilst the data is copied into the NumPy array, the alternative would require calculating the tiled size of each DEM before processing and then copying into a pre-allocated NumPy array, which was not within the scope of this project.
-This array is then converted to a PyTorch tensor, however this is computationally very cheap as both use the same representation of n-dimensional arrays in memory and so does not involve copying.
-A threading pool was originally implemented to increase the speed of pre-processing, as most of work is handled by external C libraries which are not limited by the fact that only one python thread can execute bytecode at a time but despite success in reducing loading times, the issue of pre-processing memory usage became considerably worse and the idea had to be abandoned.
+The NumPy array is then converted to a PyTorch tensor, however this is computationally very cheap as both use the same representation of n-dimensional arrays in memory and so does not involve copying.
+
+A threading pool was originally implemented to increase the speed of pre-processing, as most of work is handled by external C libraries which are not limited by the fact that only one python thread can execute bytecode at a time.
+Despite success in reducing loading times, the issue of pre-processing memory usage became considerably worse and longer load times were judged to be preferable over higher memory usage.
+
 
 ** Deep Generational Model
 *** Deep Generational Model Structure
+
+The proposed DEM void infilling model is an adaptation of the image inpainting model proposed by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
+This GAN architecture consists of a two-stage coarse to fine generator (Figure [[fig:generator]]) which increases the receptive fields of the convolutional layers and two discriminators (Figure [[fig:discriminator]]).
+The generator $G$ takes as input DEM elevation and slope with void pixels set equal to 1, and a binary mask to indicate the hole regions, outputting infilled elevation and slope values.
+Input data is of the size 256x256 and has a random rectangular void, sometimes splitting the entire DEM to simulate DEM joining tasks.
+The coarse network is trained explicitly with reconstruction loss, whereas the refinement network is trained with reconstruction plus two GAN losses, one discriminator judging the local loss of the inpainted area and a second the global loss of the entire infilled DEM;  enforcing consistency between infilled area and ground truth.
+The reconstruction losses reward the autoencoders for taking a DEM with voids and reconstructing it to infill the voids.
+As the coarse network takes as input the DEM with voids, it is much harder for it to learn to generate high level features, and so lower frequency data is generated.
+The power of the refinement network is the re-prediction of rough generated values, giving it a more complete scene which enables its encoder to learn better feature representation than the coarse network.
+
+#+CAPTION: Discriminator Architecure
+#+NAME: fig:discriminator
+[[file:images/critic_architecture.png]]
 
 #+CAPTION: Generator Architecure
 #+NAME: fig:generator
 #+ATTR_LATEX: :float multicolumn
 [[file:images/gan_architecture.png]]
+
+On initial training attempts, a strong checkerboard pattern was apparent within the infilled voids (Figure [[fig:checkerboard]]).
+This would not be such an issue in image inpainting, as the subtle changes in color may be imperceivable to the eye, however the margin of error for a DEM is much lower when viewed in 3D.
+Not only does this reduce the usefulness of the data, but also adds instability to the training of the network and makes it difficult to approach a local minimum.
+Initially it was suspected that these checkerboards were the result of sub-pixel convolutions[cite:@aitkenCheckerboardArtifactFree2017], however upon inspection it was discovered that the architecture described by Yu /et al./ already makes use of resize-convolutions[cite:@odenaDeconvolutionCheckerboardArtifacts2016] to mitigate this.
+Odena, /et al./[cite:@odenaDeconvolutionCheckerboardArtifacts2016] also attribute discriminators that use convolutional layers with a kernel size that is not divisible by the stride with checkerboard artifacts, and as the artifacts were not present at the beginning of training and steadily became worse it can be inferred that they were a learned behavior.
+As the kernels of the discriminator convolutional layers overlapped on certain pixels, the generator learned to abuse this and lower GAN losses by generating DEMs which also followed this pattern.
+The kernel sizes for discriminator convolutional layers were changed from 5 to 4, whilst no convolutions in the generator increase spatial dimensions, instead using nearest-neighbor interpolation.
+The convolutional structure for the entire model can be viewed in Table [[table:convolutions]], where the discriminator convolutions are also listed.
+In addition, batch normalisation was implemented in the discriminator to add noise to each batch, requiring the discriminator to learn more generalised patterns to adapt to the noise, preventing artifact patterns from compounding.
+
+#+CAPTION: Checkerboard Artifacts
+#+NAME: fig:checkerboard
+[[file:images/checkerboard.png]]
+
+All of these changes resulted in a big improvement in the data output by the generator, however there were still some pattern artifacts appearing.
+Initially to attempt to resolve this batch normalisation was introduced to all layer of the generators, except the input and output layers.
+Yu /et al./ did not use batch normalisation in their model as it is expensive in terms of VRAM and they found it to deteriorate color coherence.
+As can be seen in Figure [[fig:bn_wloss]], batch normalisation lead to instability in the network, with the loss functions of the model showing no signs of decreasing whilst adding artifacts to the inpainted DEM.
+This may be because in adversarial settings, batch normalisation reduces the inter-class margin (separation of learned high-level features), which when applied to a DEM infilling network which relies on training for a high inter-class margin, leads to the observed instability[cite:@kongWhyDoesBatch2023].
+To address the issue of these artifacts, an additional layer was added to the end of both generators, using a tanh activation function and relatively large kernel sizes (table 1).
+Yu /et al./ used no activation functions in the final layer of their generators, using the Pytorch ~clip~ function to compress output weights to between -1 and 1, however using tanh introduces non-linearity to the final layer and the large kernel sizes of the additional final layers allow the generator to learn to remove any artifacts which it generates.
+
+#+NAME: bn_wloss
+#+begin_src jupyter-python :file images/bn_loss.png
+import matplotlib.pyplot as plt
+import numpy as np
+from external import process_losses
+from scipy.interpolate import make_interp_spline
+
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/archive/log.txt') as file:
+    log = [line.strip() for line in file]
+
+
+log = log[68:]
+
+losses = process_losses(log)
+
+epoch = losses[0]
+wgan_g = losses[3]
+wgan_d = losses[4]
+
+plt.scatter(epoch, wgan_g, label='Wasserstein Generator Loss')
+plt.scatter(epoch, wgan_d, label='Wasserstein Discriminator Loss')
+
+plt.xlabel('Epoch')
+plt.ylabel('Wasserstein Distance')
+
+plt.legend()
+plt.show()
+#+end_src
+
+#+CAPTION: Unstable wasserstein loss with batch normalisation
+#+NAME:fig:bn_wloss
+#+RESULTS: bn_wloss
+[[file:images/bn_loss.png]]
+
 
 #+CAPTION: Details of network convolutions, (K)ernel, (S)tride, (C)hannels, (P)adding
 #+NAME: table:convolutions
@@ -600,23 +676,6 @@ A threading pool was originally implemented to increase the speed of pre-process
 |    21 |                    | K7,S1,C2,P3        |                           |                      |
 
 
-
-Look at the way[cite:@zhangVoidFillingBased2020] describes the stride and kernel size of the network.
-
-For obvious reasons read through[cite:@yuGenerativeImageInpainting2018].
-
-Also has good formulas and a good algorithm
-
-[cite:@gulrajaniImprovedTrainingWasserstein2017] - gradient penalty
-
-[cite:@qiuVoidFillingDigital2019] good formulas
-
-
-
-#+CAPTION: Discriminator Architecure
-#+NAME: fig:discriminator
-[[file:images/critic_architecture.png]]
-
 *** Deep Generational Model Loss Functions
 The coarse network is trained with reconstruction loss explicitly, while the refinement network is trained with reconstruction loss, global and local WGAN-GP adversarial loss.[cite:@yuGenerativeImageInpainting2018]
 ** Unified Inpainting Network
@@ -644,9 +703,23 @@ NAC DEMs were found to be of much higher quality at similar and greater resoluti
 #+begin_src jupyter-python :file images/l1_loss.png
 import matplotlib.pyplot as plt
 import numpy as np
-from external import load_losses
+from external import process_losses
 
-losses = load_losses()
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log1.txt') as file:
+    log1 = [line.strip() for line in file]
+
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log2.txt') as file:
+    log2 = [line.strip() for line in file]
+
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log3.txt') as file:
+    log3 = [line.strip() for line in file]
+
+log2 = log2[68:]
+log3 = log3[68:]
+
+log = log1 + log2 + log3
+
+losses = process_losses(log)
 
 epoch = losses[0]
 l1 = losses[1]
@@ -666,10 +739,24 @@ plt.show()
 #+begin_src jupyter-python :file images/ae_loss.png
 import matplotlib.pyplot as plt
 import numpy as np
-from external import load_losses
+from external import process_losses
 from scipy.interpolate import make_interp_spline
 
-losses = load_losses()
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log1.txt') as file:
+    log1 = [line.strip() for line in file]
+
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log2.txt') as file:
+    log2 = [line.strip() for line in file]
+
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log3.txt') as file:
+    log3 = [line.strip() for line in file]
+
+log2 = log2[68:]
+log3 = log3[68:]
+
+log = log1 + log2 + log3
+
+losses = process_losses(log)
 
 epoch = np.array(losses[0])
 ae = np.array(losses[2])
@@ -688,16 +775,31 @@ plt.ylabel('Autoencoder Loss')
 plt.show()
 #+end_src
 
-AE loss is the spatially discounted reconstruction loss[cite:@zhangVoidFillingBased2020]
 #+RESULTS:
 [[file:images/ae_loss.png]]
+
+AE loss is the spatially discounted reconstruction loss[cite:@zhangVoidFillingBased2020]
 
 #+begin_src jupyter-python :file images/wasserstein_loss.png
 import matplotlib.pyplot as plt
 import numpy as np
-from external import load_losses
+from external import process_losses
 
-losses = load_losses()
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log1.txt') as file:
+    log1 = [line.strip() for line in file]
+
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log2.txt') as file:
+    log2 = [line.strip() for line in file]
+
+with open('/home/struan/Development/Inpaint/Final Network/slope_out/log3.txt') as file:
+    log3 = [line.strip() for line in file]
+
+log2 = log2[68:]
+log3 = log3[68:]
+
+log = log1 + log2 + log3
+
+losses = process_losses(log)
 
 epoch = losses[0]
 wgan_g = losses[3]

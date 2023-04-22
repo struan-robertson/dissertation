@@ -67,21 +67,7 @@ def tile(file, kernel_size):
     # H,W,C to C,H,W
     return torch.from_numpy(all), min_max, crs, geo_transform
 
-def load_losses():
-    with open('/home/struan/Development/Inpaint/Final Network/slope_out/log1.txt') as file:
-        log1 = [line.strip() for line in file]
-
-    with open('/home/struan/Development/Inpaint/Final Network/slope_out/log2.txt') as file:
-        log2 = [line.strip() for line in file]
-
-    with open('/home/struan/Development/Inpaint/Final Network/slope_out/log3.txt') as file:
-        log3 = [line.strip() for line in file]
-
-    log2 = log2[68:]
-    log3 = log3[68:]
-
-    log = log1 + log2 + log3
-
+def process_losses(log):
     epoch = []
     l1 = []
     ae = []
