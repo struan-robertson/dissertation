@@ -395,7 +395,7 @@ Yu et al.[cite:@yuGenerativeImageInpainting2018] proposed a novel contextual att
 This layer learns where to copy feature information from in the known background (non-masked part of the image) to generate missing patches (Figure [[fig:contextual_attention]]).
 This concept is inspired by human attention, people selectively attend to specific aspects of the the environment based on relevance or saliency.
 As the layer is differentiable it can be trained, improving the efficiency of the network as a whole.
-The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
+The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs; by matching background regions to copy from the network does not have to hallucinate entirely novel data, with the resulting inpainting result being more cohesive with the rest of the image.
 
 ** Related Work
 
@@ -725,9 +725,10 @@ The penalty term is added to equation x to obtain a new objective function:
 \end{split}
 \end{equation}
 Where $\hat{x}$ is sampled from the straight line between points sampled from distribution $\mathbb{P}_g$ and $\mathbb{P}_r$.
+Yu /et al./[cite:@yuGenerativeImageInpainting2018] note that this is because the gradient of $D^*$ at all points $\hat{x} = (1-t)x + t\tilde{x}$ on the straight line should point directly towards current sample $\tilde{x}$, therefore $\nabla_{\hat{x}}D^*(\hat{x}) = \frac{\tilde{x} - \hat{x}}{\Vert \tilde{x} - \hat{x} \Vert}$.
 
 For DEM infilling, only void regions should be predicted, thus the gradient penalty should only be applied to pixels within voids.
-Yu /et al./[cite:@yuGenerativeImageInpainting2018] implemented this with multiplication of gradients and input mask $m$:
+Yu /et al./ implemented this with multiplication of gradients and input mask $m$:
 \begin{equation}
 \begin{split}
  \min_G \max_{D \in \mathcal{D}} &\ \mathbb{E}_{x \sim \mathbb{P}_r} \left[D(x)\right] \\ &- \mathbb{E}_{\tilde{x} \sim \mathbb{P}_g} \left[ D(\tilde{x}) \right] \\ &+ \lambda \mathbb{E}_{\hat{x} \sim \mathbb{P}_{\hat{x}}} \left[ \Vert \nabla_{\hat{x}}D(\hat{x}) \odot (1 - m) \Vert_2 - 1 \right]^2
@@ -791,7 +792,9 @@ The effectiveness of spatially discounted reconstruction loss can be seen by com
 Both graphs show their respective losses over training, with the spatially discounted reconstruction loss accurately showing convergence of the model around epoch 500 whilst the normal reconstruction loss has largely random values.
 This must be taken in context, the network was not trained to minimise the normal reconstruction loss, however it demonstrates that plausible infilled data would have been penalised if using normal reconstruction loss.
 
+
 *** Contextual Attention Layer
+
 The contextual attention layer learns to copy features from known non-void patches into likely regions within a void, first described by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
 For the purposes of the contextual attention layer, the non-void area is referred to as the background and the void area the foreground.
 Patches are extracted from the background of size 3x3, and then reshaped as convolutional filters.
@@ -811,17 +814,56 @@ For example, the equation for the left-right propagation for kernel size $k$ is 
 \hat{s}_{x,y,x^\prime,y^\prime} = \sum_{i \in \{-k,\dots,k\}} s^*_{x,y,x^\prime,y^\prime}
 \end{equation}
 
-*Change CAL background section!*
+The use of contextual attention is possible due to the coarse-to-fine architecture of the network (Figure [[fig:generator]]).
+This is because contextual attention requires matching patches in the foreground to the background, however if there was a single encoder-decoder, then there would be no patches in the foreground; the coarse prediction is used as an initial step to find likely matching background patches.
 
-** Unified Inpainting Network
+*** Model Training
 
-Contextual attention layer works thanks to the coarse network, so patches from the coarse network can be matched to patches of the background.
+For training, given a raw image $x$, we sample a binary image mask at a random location.
+Input image $z$ is corrupted from the raw image as $z = x \odot m$.
+Inpainting network $G$ takes concatenation of $z$ and $m$ as input, and output predicted image $x^\prime = G(z,m)$ with the same size as input.
+Pasting the masked region of $x^\prime$ to input image, we hey the inpainting output $\tilde{x} = z + x^\prime \odot (1 - m)$.
+
+Sample a batch of DEM tiles denoted as $x$ randomly from the training data.
+Random binary masks are generated for each tile in $x$; with there being an equal chance that the masks are a normal rectangle or a rectangle which splits the tile vertically.
+Input tiles $z$ are corrupted from the ground truth $x$ as $z = x \odot m$.
+Void infilling network $G$ takes concatenation of $z$ and $m$ as input, with the output being the predicted tiles $x^\prime = G(z,m$).
+$x^\prime$ is the same size as the input tiles, however is entirely generated.
+As the ground truth must not be edited in the final output, the infilled void regions of $x^\prime$ are pasted into $z$, with the final infilling result $\tilde{x} = z + c^\prime \odot (1-m)$.
+
+The critic is trained $n_{critic}$ times before training the generator once.
+This ensures that the critic provides a more accurate estimation of the Wasserstein distance, leading to better and more stable training[cite:@arjovskyWassersteinGenerativeAdversarial2017].
+$n_{critic}$ was set to 5 for all training in this paper, as is usually the case
+
+
+\begin{algorithm}
+\DontPrintSemicolon
+
+\caption{Network Training}
+\label{alg:training}
+
+\While{$G$ has not converged}{
+    \For{ $i=1, \dots, n_{critic}$}{
+        Sample batch DEM tiles $x$ from training data \;
+        Generate random masks $m$ for $x$ \;
+        Construct inputs $z \gets x \odot m$ \;
+        Get predictions $\tilde{x} \gets z + G(z,m) \cdot (1 - m)$ \;
+        Sample $t \sim U[0,1]$ and $\hat{x} \gets (1 - t)x + t\tilde{x}$ \;
+        Update two critics with $x$, $\tilde{x}$ and $\hat{x}$
+    }
+    Sample batch DEM tiles $x$ from training data \;
+    Generate random masks $m$ for $x$ \;
+    Update infilling network $G$ with spatially discounted $l_1$ loss and two adversarial critic losses \;
+}
+
+\end{algorithm}
 
 ** Data Post-processing
 *** Poisson Blending
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning[cite:@perezPoissonImageEditing2003] was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
+For vertical masks the tile must be padded.
 *** Gaussian Blur
 
 
@@ -936,11 +978,13 @@ plt.show()
 
 * Conclusion
 Check if because the network is fully convolutional, can it be used on arbritrary sizes once trained
+It is, so change related work section
 
 * Future Work
 
 Uncertainty maps
 Maybe region normalisation?[cite:@yuRegionNormalizationImage2023]
+Terrain texture based loss function
 
 #+LATEX: \section*{Acknowledgements}
 
