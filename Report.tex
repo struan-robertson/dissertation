@@ -1,4 +1,4 @@
-% Created 2023-04-22 Sat 04:14
+% Created 2023-04-23 Sun 03:06
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -77,7 +77,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org2a3d1b8}
+\label{sec:orga173657}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -110,9 +110,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:orga6f190d}
+\label{sec:org5b4f012}
 \subsection{Digital Elevation Maps}
-\label{sec:org3bbf106}
+\label{sec:orgefadafe}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -157,7 +157,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org2ef8b56}
+\label{sec:org48d94f9}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -190,8 +190,8 @@ This can improve the performance of the network when dealing with noisy or outli
 For this reason ELU is the most common activation function in the network described by this paper.
 Other activation functions used are Leaky ReLU and Tanh.
 Leaky ReLU also addresses the dying ReLU problem, however instead of a smooth curve to \(-\alpha\), negative values have a small constant negative slope equal to \(\alpha\) (usually 0.1).
-Leaky ReLU is used in the discriminator of this the network described by this paper as it allows the activation to be infinitely small.
-In generative networks such as the generator, this can lead to vanishing gradients, however in classifier networks such as the discriminator it is important for it to be able to learn negative associations.
+Leaky ReLU is used in the critic of this the network described by this paper as it allows the activation to be infinitely small.
+In generative networks such as the generator, this can lead to vanishing gradients, however in classifier networks such as the critic it is important for it to be able to learn negative associations.
 The Tanh activation function compresses all activations to between -1 and 1, and so is used as the final layer in generative networks to produce output data of the same range as the input data.
 
 \begin{equation}
@@ -268,7 +268,7 @@ Finally calculate the layers output \(\hat{Z^{(i)}}\) by applying a linear trans
 \(\gamma\) adjusts the standard deviation and \(\beta\) adjusts the bias, shifting the curve to the right or left side.\autocite{huberBatchNormalizationLevels2022}
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:orgb7ae050}
+\label{sec:orgfbedbc1}
 
 \begin{figure}[htbp]
 \centering
@@ -320,18 +320,19 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org2ab7f04}
+\label{sec:orgc94c278}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
 The adversarial loss between the competing networks is able to catch errors which would be overlooked by other loss functions, such as mean squared error\autocite{lotterUnsupervisedLearningVisual2016}.
 
 A difficult challenge of training GANs is keeping the training of both generator and discriminator balanced.
-If one network becomes substantially better than the other, the gradient for the better network will explode and the other networks gradient will vanish.
-Wasserstein GANs\autocite{arjovskyWassersteinGenerativeAdversarial2017} improve this situation by using the Wasserstein-1 distance to measure discrepancy between real and generated data distributions.
-The Wasserstein-1 distance is a measure of how much effort it would take to move one probability density into another, which is continuous in nature, leading to more stable gradients.
-To further improve the stability of the network, a gradient penalty can be applied to the network to ensure that both generator and discriminator train at similar rates\autocite{gulrajaniImprovedTrainingWasserstein2017}.
-If one trains faster than the other, the gradient descent is penalised to allow the other to close the gap.
+If the discriminator becomes substantially better than the generator, the gradient for the generator will vanish as it is unable to ever trick the discriminator.
+Wasserstein GANs\autocite{arjovskyWassersteinGenerativeAdversarial2017} (WGANs) improve this situation by using the Wasserstein-1 distance to measure discrepancy between real and generated data distributions, providing a stable and continuous gradient with a more meaningful relationship between the critics loss and the quality of the generated images.
+In a WGAN, the discriminator is referred to as a critic as it learns to estimate the Wasserstein distance rather than simply classifying samples as real or fake, however its role is still adversarial as it competes with the generator to improve its estimate of the Wasserstein distance.
+The Wasserstein-1 distance is also referred to as the Earth-Movers (EM) distance, as it is a measure of the minimum effort required to move one probability distribution into another.
+To further improve the stability of the network, a gradient penalty can be applied to the network to ensure that the critic does not train too quickly and overpower the generator\autocite{gulrajaniImprovedTrainingWasserstein2017}.
+If the gradient norm of the critic is too large, it is penalised to allow the generator to close the gap.
 
 A GAN containing only convolutional layers is referred to as a deep convolutional GAN\autocite{radfordUnsupervisedRepresentationLearning2016}.
 This simplification of the network is more computationally efficient than the GAN first proposed by Goodfellow et al.\autocite{goodfellowGenerativeAdversarialNetworks2020}, whilst allowing for deeper models and increased image resolution.
@@ -360,7 +361,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
 \subsection{Related Work}
-\label{sec:orgc2c6f62}
+\label{sec:orge3b9b09}
 
 \emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -400,8 +401,8 @@ Relief degree data is largely similar to the slope of a pixel, as pixels with a 
 By removing relief degree from the training set, memory equal to the size of the DEM elevation training data was freed, and the initial pre-processing stage became faster.
 
 TTGM also uses a deep convolutional GAN (DCGAN), however of a different architecture than the one described by the current paper.
-Instead of featuring an autoencoder, TGGM has a symmetrical GAN structure, where the generator and discriminator are the same structure inverted.
-Although TTGM uses Wasserstein distance, it does not feature a contextual attention layer, encoder-decoder architecture, coarse and fine generators or local and global discriminators and so whilst both use slope data, the network described by the current paper is likely more effective at DEM void infilling, whilst being more efficient in terms of memory.
+Instead of featuring an autoencoder, TGGM has a symmetrical GAN structure, where the generator and critic are the same structure inverted.
+Although TTGM uses Wasserstein distance, it does not feature a contextual attention layer, encoder-decoder architecture, coarse and fine generators or local and global critics and so whilst both use slope data, the network described by the current paper is likely more effective at DEM void infilling, whilst being more efficient in terms of memory.
 Both networks use resize-convolutions\autocite{aitkenCheckerboardArtifactFree2017}\autocite{odenaDeconvolutionCheckerboardArtifacts2016} to remove checkerboard artifacts from convolutional layers that increase spatial dimensions.
 Qui \emph{et al.} were the only authors to use batch normalisation within the generator of their network.
 
@@ -415,10 +416,10 @@ Whilst this means that the trained models would not be effective at lunar void i
 
 
 \section{Methodology}
-\label{sec:org2bd751c}
+\label{sec:orgbd501dc}
 
 \subsection{Problem Formation and Notation}
-\label{sec:orga27d0b4}
+\label{sec:org939479c}
 
 Due to the similar nature of the problem being solved, the problem notation has been adapted from Gavriil \emph{et al.}\autocite{gavriilVoidFillingDigital2019}.
 DEMs in both GeoTiff, PDS3 and PDS4 will be considered, in all of which data forms a grid with a single height value for every position \((i, j)\).
@@ -432,7 +433,7 @@ We refer to pixels \(p\) for which \(m_p = 1\) as \emph{known}, and \emph{unknow
 
 
 \subsection{Data Pre-Processing}
-\label{sec:orgd26ba1c}
+\label{sec:orgbd0f5d8}
 
 \textbf{Need to add a graph of data pipeline}
 
@@ -510,15 +511,16 @@ Despite success in reducing loading times, the issue of pre-processing memory us
 
 
 \subsection{Deep Generational Model}
-\label{sec:org5799099}
+\label{sec:org9d901e7}
+
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org94fe87f}
+\label{sec:orgc128bd5}
 
 The proposed DEM void infilling model is an adaptation of the image inpainting model proposed by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018}.
-This GAN architecture consists of a two-stage coarse to fine generator (Figure \ref{fig:generator}) which increases the receptive fields of the convolutional layers and two discriminators (Figure \ref{fig:discriminator}).
+This GAN architecture consists of a two-stage coarse to fine generator (Figure \ref{fig:generator}) which increases the receptive fields of the convolutional layers and two critics (Figure \ref{fig:critic}).
 The generator \(G\) takes as input DEM elevation and slope with void pixels set equal to 1, and a binary mask to indicate the hole regions, outputting infilled elevation and slope values.
 Input data is of the size 256x256 and has a random rectangular void, sometimes splitting the entire DEM to simulate DEM joining tasks.
-The coarse network is trained explicitly with reconstruction loss, whereas the refinement network is trained with reconstruction plus two GAN losses, one discriminator judging the local loss of the inpainted area and a second the global loss of the entire infilled DEM;  enforcing consistency between infilled area and ground truth.
+The coarse network is trained explicitly with reconstruction loss, whereas the refinement network is trained with reconstruction plus two GAN losses, one critic judging the local loss of the inpainted area and a second the global loss of the entire infilled DEM;  enforcing consistency between infilled area and ground truth.
 The reconstruction losses reward the autoencoders for taking a DEM with voids and reconstructing it to infill the voids.
 As the coarse network takes as input the DEM with voids, it is much harder for it to learn to generate high level features, and so lower frequency data is generated.
 The power of the refinement network is the re-prediction of rough generated values, giving it a more complete scene which enables its encoder to learn better feature representation than the coarse network.
@@ -526,7 +528,7 @@ The power of the refinement network is the re-prediction of rough generated valu
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.9\linewidth]{images/critic_architecture.png}
-\caption{\label{fig:discriminator}Discriminator Architecure}
+\caption{\label{fig:critic}Critic Architecure}
 \end{figure}
 
 \begin{figure*}
@@ -539,11 +541,11 @@ On initial training attempts, a strong checkerboard pattern was apparent within 
 This would not be such an issue in image inpainting, as the subtle changes in color may be imperceivable to the eye, however the margin of error for a DEM is much lower when viewed in 3D.
 Not only does this reduce the usefulness of the data, but also adds instability to the training of the network and makes it difficult to approach a local minimum.
 Initially it was suspected that these checkerboards were the result of sub-pixel convolutions\autocite{aitkenCheckerboardArtifactFree2017}, however upon inspection it was discovered that the architecture described by Yu \emph{et al.} already makes use of resize-convolutions\autocite{odenaDeconvolutionCheckerboardArtifacts2016} to mitigate this.
-Odena, \emph{et al.}\autocite{odenaDeconvolutionCheckerboardArtifacts2016} also attribute discriminators that use convolutional layers with a kernel size that is not divisible by the stride with checkerboard artifacts, and as the artifacts were not present at the beginning of training and steadily became worse it can be inferred that they were a learned behavior.
-As the kernels of the discriminator convolutional layers overlapped on certain pixels, the generator learned to abuse this and lower GAN losses by generating DEMs which also followed this pattern.
-The kernel sizes for discriminator convolutional layers were changed from 5 to 4, whilst no convolutions in the generator increase spatial dimensions, instead using nearest-neighbor interpolation.
-The convolutional structure for the entire model can be viewed in Table \ref{table:convolutions}, where the discriminator convolutions are also listed.
-In addition, batch normalisation was implemented in the discriminator to add noise to each batch, requiring the discriminator to learn more generalised patterns to adapt to the noise, preventing artifact patterns from compounding.
+Odena, \emph{et al.}\autocite{odenaDeconvolutionCheckerboardArtifacts2016} also attribute critics that use convolutional layers with a kernel size that is not divisible by the stride with checkerboard artifacts, and as the artifacts were not present at the beginning of training and steadily became worse it can be inferred that they were a learned behavior.
+As the kernels of the critic convolutional layers overlapped on certain pixels, the generator learned to abuse this and lower GAN losses by generating DEMs which also followed this pattern.
+The kernel sizes for critic convolutional layers were changed from 5 to 4, whilst no convolutions in the generator increase spatial dimensions, instead using nearest-neighbor interpolation.
+The convolutional structure for the entire model can be viewed in Table \ref{table:convolutions}, where the critic convolutions are also listed.
+In addition, batch normalisation was implemented in the critic to add noise to each batch, requiring the critic to learn more generalised patterns to adapt to the noise, preventing artifact patterns from compounding.
 
 \begin{figure}[htbp]
 \centering
@@ -570,7 +572,7 @@ Yu \emph{et al.} used no activation functions in the final layer of their genera
 \caption{\label{table:convolutions}Details of network convolutions, (K)ernel, (S)tride, (C)hannels, (P)adding}
 \centering
 \begin{tabular}{rllll}
-Layer & Coarse Generator & Fine Generator & Contextual Attention (CA) & Discriminators\\[0pt]
+Layer & Coarse Generator & Fine Generator & Contextual Attention (CA) & Critics\\[0pt]
 \hline
 1 & K5,S1,C32,P2 & K5,S1,C32,P2 & K5,S1,C32,P2 & K4,S2,C64,P1\\[0pt]
 2 & K3,S2,C64,P1 & K3,S2,C32,P1 & K3,S2,C32,P1 & K4,S2,C128,P1\\[0pt]
@@ -597,26 +599,78 @@ Layer & Coarse Generator & Fine Generator & Contextual Attention (CA) & Discrimi
 \end{table*}
 
 
-\subsubsection{Deep Generational Model Loss Functions}
-\label{sec:org5ac7d10}
-The coarse network is trained with reconstruction loss explicitly, while the refinement network is trained with reconstruction loss, global and local WGAN-GP adversarial loss.\autocite{yuGenerativeImageInpainting2018}
+\subsubsection{Deep Generational Model Discriminant Loss}
+\label{sec:org4fab728}
+
+A Wasserstein GAN uses the \emph{Earth-Mover} (EM) distance \(W(\mathbb{P}_r \mathbb{P}_g)\), also known as the \emph{Wasserstein-1} distance instead of the KL divergence used by Goodfellow \emph{et al.}\autocite{goodfellowGenerativeAdversarialNetworks2020} in the initial GAN proposition.
+The EM distance for the real data distribution \(\mathbb{P}_r\) and generated data distribution \(\mathbb{P}_g\)  is the minimum cost of transporting mass to convert \(\mathbb{P}_r\) to \(\mathbb{P}_g\).
+It is mathematically defined as the greatest lower bound (infimum) for any transport plan \(\gamma\):
+
+\begin{equation}
+W(\mathbb{P}_r,\mathbb{P}_g) = \inf_{\gamma \in \Pi(\mathbb{P}_r,\mathbb{P}_g)} \mathbb{E}_{(x,y) \sim \gamma}\left[\Vert x - y \Vert \right]
+\end{equation}
+\(\Pi(\mathbb{P}_r, \mathbb{P}_g)\) denotes the set of all joint distributions \(\gamma(x,y)\) whose marginals are respectively \(\mathbb{P}_r\) and \(\mathbb{P}_g\).
+\(\Pi\) contains all the possible transport plans.
+
+Using the Kantorovich-Rubinstein duality, the calculation can be simplified to:
+\begin{equation}
+W(\mathbb{P}_r, \mathbb{P}_{g}) = \sup_{\Vert f \Vert L \leq 1} \mathbb{E}_{x \sim \mathbb{P}_r} \left[f(x)\right] - \mathbb{E}_{x \sim \mathbb{P}_{g}} \left[f(x)\right]
+\end{equation}
+Where \(sup\) is the least upper bound and \(f\) is a 1-Lipschitz function that follows the constraint:
+\begin{equation}
+\vert f(x_1) - f(x_2) \vert \leq \vert x_1 - x_2 \vert
+\end{equation}
+
+This means that to calculate the EM distance, a 1-Lipschitz function must be found.
+The critic of the network is used as \(f\) to learn the 1-Lipschitz function which most accurately calculates the EM distance, with the following objective function proposed by Arjovsky \emph{et al.}\autocite{arjovskyWassersteinGenerativeAdversarial2017}:
+\begin{equation}
+ \min_G \max_{D \in \mathcal{D}} \mathbb{E}_{x \sim \mathbb{P}_r} \left[D(x)\right] - \mathbb{E}_{\tilde{x} \sim \mathbb{P}_g} \left[ D(\tilde{x}) \right]
+\end{equation}
+Where \(\mathcal{D}\) is the set of 1-Lipschitz functions and \(\mathbb{P}_g\) is the model distribution implicitly defined by \(\tilde{x} = G(z)\), with \(z\) being the input to the generator.
+
+The objective function of a GAN is the adversarial loss function, where the generator tries to minimise the function and the critic tries to maximise it.
+In this case the critic maximises the objective function by learning a 1-Lipschitz function which more accurately calculates the EM distance.
+
+To enforce \(D\) to be a 1-Lipschitz function, a WGAN clips the maximum weight value in \(D\) to a range determined by the hyperparameter \(c\), which must be tuned.
+Clipping introduces problems such as vanishing gradients, with the original WGAN paper noting it was a terrible way to enforce a Lipschitz constraint\autocite{arjovskyWassersteinGenerativeAdversarial2017}.
+
+Gulrajani \emph{et al.}\autocite{gulrajaniImprovedTrainingWasserstein2017} proposed an improved version of WGAN, using a gradient penalty (WGAN-GP) term instead of clipping to remedy these issues.
+The penalty term is added to equation x to obtain a new objective function:
+\begin{equation}
+\begin{split}
+ \min_G \max_{D \in \mathcal{D}} &\  \mathbb{E}_{x \sim \mathbb{P}_r} \left[D(x)\right] \\  &- \mathbb{E}_{\tilde{x} \sim \mathbb{P}_g} \left[ D(\tilde{x}) \right] \\ &+ \lambda \mathbb{E}_{\hat{x} \sim \mathbb{P}_{\hat{x}}} \left[ \Vert \nabla_{\hat{x}}D(\hat{x}) \Vert_2 - 1 \right]^2
+\end{split}
+\end{equation}
+Where \(\hat{x}\) is sampled from the straight line between points sampled from distribution \(\mathbb{P}_g\) and \(\mathbb{P}_r\).
+
+For DEM infilling, only void regions should be predicted, thus the gradient penalty should only be applied to pixels within voids.
+Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018} implemented this with multiplication of gradients and input mask \(m\):
+\begin{equation}
+\begin{split}
+ \min_G \max_{D \in \mathcal{D}} &\ \mathbb{E}_{x \sim \mathbb{P}_r} \left[D(x)\right] \\ &- \mathbb{E}_{\tilde{x} \sim \mathbb{P}_g} \left[ D(\tilde{x}) \right] \\ &+ \lambda \mathbb{E}_{\hat{x} \sim \mathbb{P}_{\hat{x}}} \left[ \Vert \nabla_{\hat{x}}D(\hat{x}) \odot (1 - m) \Vert_2 - 1 \right]^2
+\end{split}
+\end{equation}
+
+Where the mask value is 0 for missing pixels and 1 for elsewhere.
+\(\lambda\) was set to 10 for the training of the network.
+
 \subsection{Unified Inpainting Network}
-\label{sec:orgaf89774}
+\label{sec:orgfe1ebba}
 \subsection{Data Post-processing}
-\label{sec:org8c53ee0}
+\label{sec:orge2a8da0}
 \subsubsection{Poisson Blending}
-\label{sec:org39e4039}
+\label{sec:orgb44c729}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:org164e23d}
+\label{sec:orgba0bef9}
 
 
 \section{Experiments}
-\label{sec:org40c9d01}
+\label{sec:orgbd68d05}
 \subsection{Model Training}
-\label{sec:orged3a35a}
+\label{sec:orgc3143d0}
 Talk about all the changes made to the network
 
 To train the network, large quantities of high quality DEM data is required.
@@ -624,11 +678,13 @@ Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however the
 NAC DEMs were found to be of much higher quality at similar and greater resolutions.
 64 NAC DEMs\autocite{LROCRDRProduct} representing a variety of lunar terrain features were selected at random for the training set, with a further 32 selected for testing and validation purposes.
 \subsection{Model Testing Methodology}
-\label{sec:org086199b}
+\label{sec:org1df5a84}
 
+
+Compare slope to no slope
 
 \section{Results}
-\label{sec:org7b17a2a}
+\label{sec:org8ec7cb2}
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{images/l1_loss.png}
@@ -646,13 +702,13 @@ AE loss is the spatially discounted reconstruction loss\autocite{zhangVoidFillin
 
 
 \section{Discussion}
-\label{sec:orgf79cfd3}
+\label{sec:org24b0e41}
 
 \section{Conclusion}
-\label{sec:org4fa1f8e}
+\label{sec:org4a54c88}
 
 \section{Future Work}
-\label{sec:orgdc3898f}
+\label{sec:orgbb70d13}
 
 Uncertainty maps
 Maybe region normalisation?\autocite{yuRegionNormalizationImage2023}
