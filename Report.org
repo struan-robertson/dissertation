@@ -30,6 +30,9 @@
 #+LATEX_HEADER: \usepackage{stfloats}
 #+LATEX_HEADER: \usepackage[ruled, lined, linesnumbered, commentsnumbered, longend]{algorithm2e}
 #+LATEX_HEADER: \newcommand{\Mod}[1]{\ (\mathrm{mod}\ #1)}
+#+LATEX_HEADER: \usepackage{subcaption}
+
+#+LATEX_HEADER: \usepackage{amsmath}
 
 # Font sizes
 #+LaTeX_HEADER: \usepackage{sectsty}
@@ -101,6 +104,7 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 * Background
+
 ** Digital Elevation Maps
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure [[fig:apollo_17]]).
@@ -149,11 +153,11 @@ t = np.transpose(t, (1, 2, 0))
 plt.figure(figsize=(8,10))
 plt.subplot(1,2,1)
 plt.imshow(t[:,:,0], cmap='terrain')
-plt.title("DEM")
+plt.title("(a) DEM")
 plt.axis('off')
 plt.subplot(1,2,2)
 plt.imshow(t[:,:,1], cmap='viridis')
-plt.title("Slope")
+plt.title("(b) Slope")
 plt.axis('off')
 plt.show()
 #+end_src
@@ -185,6 +189,7 @@ Older missions (pre 2011) are typically archived in PDS3, with post 2011 mission
 Although stored differently, the raster data in PDS files and GeoTiffs is identical.
 
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
+
 
 ** Deep Neural Networks
 
@@ -396,6 +401,7 @@ This layer learns where to copy feature information from in the known background
 This concept is inspired by human attention, people selectively attend to specific aspects of the the environment based on relevance or saliency.
 As the layer is differentiable it can be trained, improving the efficiency of the network as a whole.
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs; by matching background regions to copy from the network does not have to hallucinate entirely novel data, with the resulting inpainting result being more cohesive with the rest of the image.
+
 
 ** Related Work
 
@@ -682,7 +688,6 @@ Yu /et al./ used no activation functions in the final layer of their generators,
 |    20 | K5,S1,C2,P2        | K3,S1,C2,P1        |                           |                      |
 |    21 |                    | K7,S1,C2,P3        |                           |                      |
 
-
 *** Wasserstein GAN Gradient Penalty Loss
 
 A Wasserstein GAN uses the /Earth-Mover/ (EM) distance $W(\mathbb{P}_r \mathbb{P}_g)$, also known as the /Wasserstein-1/ distance instead of the KL divergence used by Goodfellow /et al./[cite:@goodfellowGenerativeAdversarialNetworks2020] in the initial GAN proposition.
@@ -728,10 +733,10 @@ Where $\hat{x}$ is sampled from the straight line between points sampled from di
 Yu /et al./[cite:@yuGenerativeImageInpainting2018] note that this is because the gradient of $D^*$ at all points $\hat{x} = (1-t)x + t\tilde{x}$ on the straight line should point directly towards current sample $\tilde{x}$, therefore $\nabla_{\hat{x}}D^*(\hat{x}) = \frac{\tilde{x} - \hat{x}}{\Vert \tilde{x} - \hat{x} \Vert}$.
 
 For DEM infilling, only void regions should be predicted, thus the gradient penalty should only be applied to pixels within voids.
-Yu /et al./ implemented this with multiplication of gradients and input mask $m$:
+Yu /et al./ implemented this with multiplication of gradients and input mask $M$:
 \begin{equation}
 \begin{split}
- \min_G \max_{D \in \mathcal{D}} &\ \mathbb{E}_{x \sim \mathbb{P}_r} \left[D(x)\right] \\ &- \mathbb{E}_{\tilde{x} \sim \mathbb{P}_g} \left[ D(\tilde{x}) \right] \\ &+ \lambda \mathbb{E}_{\hat{x} \sim \mathbb{P}_{\hat{x}}} \left[ \Vert \nabla_{\hat{x}}D(\hat{x}) \odot (1 - m) \Vert_2 - 1 \right]^2
+ \min_G \max_{D \in \mathcal{D}} &\ \mathbb{E}_{x \sim \mathbb{P}_r} \left[D(x)\right] \\ &- \mathbb{E}_{\tilde{x} \sim \mathbb{P}_g} \left[ D(\tilde{x}) \right] \\ &+ \lambda \mathbb{E}_{\hat{x} \sim \mathbb{P}_{\hat{x}}} \left[ \Vert \nabla_{\hat{x}}D(\hat{x}) \odot (1 - M) \Vert_2 - 1 \right]^2
 \end{split}
 \end{equation}
 
@@ -817,24 +822,19 @@ For example, the equation for the left-right propagation for kernel size $k$ is 
 The use of contextual attention is possible due to the coarse-to-fine architecture of the network (Figure [[fig:generator]]).
 This is because contextual attention requires matching patches in the foreground to the background, however if there was a single encoder-decoder, then there would be no patches in the foreground; the coarse prediction is used as an initial step to find likely matching background patches.
 
+
 *** Model Training
 
-For training, given a raw image $x$, we sample a binary image mask at a random location.
-Input image $z$ is corrupted from the raw image as $z = x \odot m$.
-Inpainting network $G$ takes concatenation of $z$ and $m$ as input, and output predicted image $x^\prime = G(z,m)$ with the same size as input.
-Pasting the masked region of $x^\prime$ to input image, we hey the inpainting output $\tilde{x} = z + x^\prime \odot (1 - m)$.
-
-Sample a batch of DEM tiles denoted as $x$ randomly from the training data.
-Random binary masks are generated for each tile in $x$; with there being an equal chance that the masks are a normal rectangle or a rectangle which splits the tile vertically.
-Input tiles $z$ are corrupted from the ground truth $x$ as $z = x \odot m$.
-Void infilling network $G$ takes concatenation of $z$ and $m$ as input, with the output being the predicted tiles $x^\prime = G(z,m$).
-$x^\prime$ is the same size as the input tiles, however is entirely generated.
-As the ground truth must not be edited in the final output, the infilled void regions of $x^\prime$ are pasted into $z$, with the final infilling result $\tilde{x} = z + c^\prime \odot (1-m)$.
+Sample a batch of DEMs denoted as $x$ randomly from the training data.
+Random binary masks $M$ are generated for each DEM in $x$; with there being an equal chance that the masks are a normal rectangle or a rectangle which splits the DEM vertically.
+Input DEMs $z$ are corrupted from the ground truth $x$ as $z = x \odot M$.
+Void infilling network $G$ takes concatenation of $z$ and $M$ as input, with the output being the predicted DEMs $x^\prime = G(z,M$).
+$x^\prime$ is the same size as the input DEMs, however is entirely generated.
+As the ground truth must not be edited in the final output, the infilled void regions of $x^\prime$ are pasted into $z$, with the final infilling result $\tilde{x} = z + c^\prime \odot (1-M)$.
 
 The critic is trained $n_{critic}$ times before training the generator once.
 This ensures that the critic provides a more accurate estimation of the Wasserstein distance, leading to better and more stable training[cite:@arjovskyWassersteinGenerativeAdversarial2017].
-$n_{critic}$ was set to 5 for all training in this paper, as is usually the case
-
+$n_{critic}$ was set to 5 for all training in this paper, as is usually the case.
 
 \begin{algorithm}
 \DontPrintSemicolon
@@ -844,28 +844,54 @@ $n_{critic}$ was set to 5 for all training in this paper, as is usually the case
 
 \While{$G$ has not converged}{
     \For{ $i=1, \dots, n_{critic}$}{
-        Sample batch DEM tiles $x$ from training data \;
-        Generate random masks $m$ for $x$ \;
-        Construct inputs $z \gets x \odot m$ \;
-        Get predictions $\tilde{x} \gets z + G(z,m) \cdot (1 - m)$ \;
+        Sample batch DEMs $x$ from training data \;
+        Generate random masks $M$ for $x$ \;
+        Construct inputs $z \gets x \odot M$ \;
+        Get predictions $\tilde{x} \gets z + G(z,m) \cdot (1 - M)$ \;
         Sample $t \sim U[0,1]$ and $\hat{x} \gets (1 - t)x + t\tilde{x}$ \;
         Update two critics with $x$, $\tilde{x}$ and $\hat{x}$
     }
-    Sample batch DEM tiles $x$ from training data \;
-    Generate random masks $m$ for $x$ \;
+    Sample batch DEMs $x$ from training data \;
+    Generate random masks $M$ for $x$ \;
     Update infilling network $G$ with spatially discounted $l_1$ loss and two adversarial critic losses \;
 }
 
 \end{algorithm}
 
-** Data Post-processing
-*** Poisson Blending
+
+** Poisson Blending
+
+Although the network uses a global critic to encourage the network to not hallucinate non-masked values during reconstruction, the predicted DEM $x^\prime$ may differ slightly from the ground truth $x$ outside of masked regions.
+As the infilled void regions of $x^\prime$ are pasted into the corrupted input DEM $z$ to create a complete DEM, these differences can result in a vertical deviation (Figure x).
+
+Poisson seamless cloning[cite:@perezPoissonImageEditing2003] blends the gradients of two images to remove a visible boundary whilst preserving the structure of the image.
+
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning[cite:@perezPoissonImageEditing2003] was used as a post processing step to remove any boundary between the infilled area and original DEM.
+As DEMs are functionally identical this technique can also be used to remove this boundary, as proposed by Qui /et al./[cite:@qiuVoidFillingDigital2019].
 
-For vertical masks the tile must be padded.
-*** Gaussian Blur
+Infilled voids in $x^\prime$ can be seamlessly pasted into ground truth $x$ by constructing a gradient Poisson correction equation:
+\begin{equation}
+\tilde{x} = \operatorname*{argmin}_x \Vert \nabla x - \nabla x^\prime \Vert^2_2, \text{ s.t. } x^\prime_i = x_i  \text{ \space \space \it{for} \space } M_i = 1
+\end{equation}
+Where $\tilde{x}$ is the final infilling result, $x^\prime_i$ equals $x_i$ at the non-void regions of the ground truth $x$, and $\nabla$ represents the gradient operator.
 
+#+CAPTION: Poisson Blending
+#+NAME:   fig:poisson
+\begin{figure}
+\centering
+\begin{subfigure}{0.4\textwidth}
+    \includegraphics[width=\textwidth]{images/unblended.png}
+    \caption{Unblended}
+    \label{fig:unblended}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.4\textwidth}
+    \includegraphics[width=\textwidth]{images/blended.png}
+    \caption{blended}
+    \label{fig:blended}
+\end{subfigure}
+\end{figure}
 
 * Experiments
 ** Model Training
@@ -879,6 +905,7 @@ NAC DEMs were found to be of much higher quality at similar and greater resoluti
 
 
 Compare slope to no slope
+
 
 * Results
 
@@ -979,6 +1006,7 @@ plt.show()
 * Conclusion
 Check if because the network is fully convolutional, can it be used on arbritrary sizes once trained
 It is, so change related work section
+
 
 * Future Work
 
