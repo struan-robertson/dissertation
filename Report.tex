@@ -1,4 +1,4 @@
-% Created 2023-04-23 Sun 04:51
+% Created 2023-04-23 Sun 06:03
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -77,7 +77,7 @@ A Generative Adversarial Network (GAN) based on a fully convolutional architectu
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org30c14ca}
+\label{sec:org7c571cf}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -110,9 +110,9 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:orgb4b1033}
+\label{sec:orgc5969f8}
 \subsection{Digital Elevation Maps}
-\label{sec:orgbef111b}
+\label{sec:org22b615f}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -157,7 +157,7 @@ Although stored differently, the raster data in PDS files and GeoTiffs is identi
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
 
 \subsection{Deep Neural Networks}
-\label{sec:org83ed3bf}
+\label{sec:org1d30fc1}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -268,7 +268,7 @@ Finally calculate the layers output \(\hat{Z^{(i)}}\) by applying a linear trans
 \(\gamma\) adjusts the standard deviation and \(\beta\) adjusts the bias, shifting the curve to the right or left side.\autocite{huberBatchNormalizationLevels2022}
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:org904ad57}
+\label{sec:org1e5d7fe}
 
 \begin{figure}[htbp]
 \centering
@@ -320,7 +320,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:orgb4e9ebd}
+\label{sec:org922e53d}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -361,7 +361,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs.
 
 \subsection{Related Work}
-\label{sec:org008e3af}
+\label{sec:org634d7a3}
 
 \emph{A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps} by Park and Choi\autocite{parkNeuralProcessApproach2021} is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -416,10 +416,10 @@ Whilst this means that the trained models would not be effective at lunar void i
 
 
 \section{Methodology}
-\label{sec:org942b94c}
+\label{sec:org363aafa}
 
 \subsection{Problem Formation and Notation}
-\label{sec:org3487e66}
+\label{sec:orgaebf429}
 
 Due to the similar nature of the problem being solved, the problem notation has been adapted from Gavriil \emph{et al.}\autocite{gavriilVoidFillingDigital2019}.
 DEMs in both GeoTiff, PDS3 and PDS4 will be considered, in all of which data forms a grid with a single height value for every position \((i, j)\).
@@ -434,7 +434,7 @@ We refer to pixels \(p\) for which \(m_p = 1\) as \emph{known}, and \emph{unknow
 
 
 \subsection{Data Pre-Processing}
-\label{sec:org865c4ec}
+\label{sec:org512e79d}
 
 \textbf{Need to add a graph of data pipeline}
 
@@ -514,10 +514,10 @@ Despite success in reducing loading times, the issue of pre-processing memory us
 
 
 \subsection{Deep Generational Model}
-\label{sec:org226127d}
+\label{sec:org07f3242}
 
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org3ff70a4}
+\label{sec:orgcfd199c}
 
 The proposed DEM void infilling model is an adaptation of the image inpainting model proposed by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018}.
 This GAN architecture consists of a two-stage coarse to fine generator (Figure \ref{fig:generator}) which increases the receptive fields of the convolutional layers and two critics (Figure \ref{fig:critic}).
@@ -605,7 +605,7 @@ Layer & Coarse Generator & Fine Generator & Contextual Attention (CA) & Critics\
 
 
 \subsubsection{Wasserstein GAN Gradient Penalty Loss}
-\label{sec:org0f91b08}
+\label{sec:org073bad8}
 
 A Wasserstein GAN uses the \emph{Earth-Mover} (EM) distance \(W(\mathbb{P}_r \mathbb{P}_g)\), also known as the \emph{Wasserstein-1} distance instead of the KL divergence used by Goodfellow \emph{et al.}\autocite{goodfellowGenerativeAdversarialNetworks2020} in the initial GAN proposition.
 The EM distance for the real data distribution \(\mathbb{P}_r\) and generated data distribution \(\mathbb{P}_g\)  is the minimum cost of transporting mass to convert \(\mathbb{P}_r\) to \(\mathbb{P}_g\).
@@ -661,7 +661,7 @@ Where the mask value is 0 for missing pixels and 1 for elsewhere.
 
 
 \subsubsection{Spatially Discounted Reconstruction Loss}
-\label{sec:org8d9c7fe}
+\label{sec:orgeb63de1}
 
 Pixel-wise \(l_1\) reconstruction loss calculates the absolute difference between the original and reconstructed DEM.
 This is a useful metric by which to judge the accuracy of the reconstruction, however void infilling requires hallucinations of pixels and so there are likely feasible solutions that are quite different than the original DEM.
@@ -679,25 +679,51 @@ By using a value of \(\gamma\) less than 1, the closer a pixel is to the center 
 
 The effectiveness of spatially discounted reconstruction loss can be seen by comparing Figure \ref{fig:l1_loss} and Figure \ref{fig:ae_loss}.
 Both graphs show their respective losses over training, with the spatially discounted reconstruction loss accurately showing convergence of the model around epoch 500 whilst the normal reconstruction loss has largely random values.
-This must be taken in context, the network was not trained to minimise the normal reconstruction loss, however it demonstrates that plausible infilled data would have been penalised if using normal reconstruction loss. 
+This must be taken in context, the network was not trained to minimise the normal reconstruction loss, however it demonstrates that plausible infilled data would have been penalised if using normal reconstruction loss.
+
+\subsubsection{Contextual Attention Layer}
+\label{sec:orgc7f2dc6}
+The contextual attention layer learns to copy features from known non-void patches into likely regions within a void, first described by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018}.
+For the purposes of the contextual attention layer, the non-void area is referred to as the background and the void area the foreground.
+Patches are extracted from the background of size 3x3, and then reshaped as convolutional filters.
+These background patches \(\left\{ b_{x^{\prime}, y^{\prime}} \right\}\) are matched with foreground ones \(\left\{ f_{x,y} \right\}\) to copy features to by measuring with normalised inner product:
+\begin{equation}
+s_{x,y,x^\prime,y^\prime} = \left \langle \frac{f_{x,y}}{\Vert f_{x,y} \Vert}, \frac{b_{x^\prime,y^\prime}}{\Vert b_{x^\prime,y^\prime} \Vert} \right \rangle
+\end{equation}
+Where \(s_{x,y,x^\prime,y^\prime}\) represents the similarity of feature matching between a patch centered in foreground \((x,y)\) and background \((x^\prime, y^\prime)\).
+
+The attention score of each background block can be calculated with \(s^*_{x,y,x^\prime,y^\prime} = softmax_{x^\prime, y^\prime} \left( \lambda s_{x,y,x^\prime,y^\prime} \right)\), where \(\lambda\) is a constant value.
+The optimal block \(\left \{ b_{x^\prime, y^\prime} \right\}\) is selected, and used as convolution filters to reconstruct foregrounds during deconvolution.
+Values of overlapping pixels are averaged.
+It can be inferred that matched patches will likely be coherent, meaning that a change in a background block will likely correspond to an equal change in a foreground block.
+To help maintain the overall consistency of the infilled DEM, a left-right propagation is done, followed by a top-down propagation to get a new attention score for matched blocks.
+For example, the equation for the left-right propagation for kernel size \(k\) is as follows:
+\begin{equation}
+\hat{s}_{x,y,x^\prime,y^\prime} = \sum_{i \in \{-k,\dots,k\}} s^*_{x,y,x^\prime,y^\prime}
+\end{equation}
+
+\textbf{Change CAL background section!}
+
 \subsection{Unified Inpainting Network}
-\label{sec:org569b75b}
+\label{sec:org263b305}
+
+Contextual attention layer works thanks to the coarse network, so patches from the coarse network can be matched to patches of the background.
 
 \subsection{Data Post-processing}
-\label{sec:org3780969}
+\label{sec:org10c09e2}
 \subsubsection{Poisson Blending}
-\label{sec:orge467f97}
+\label{sec:org3aad263}
 Due to the similarity with images, image processing techniques can be applied to the DEMs.
 In this paper, the technique of poisson seamless cloning\autocite{perezPoissonImageEditing2003} was used as a post processing step to remove any boundary between the infilled area and original DEM.
 
 \subsubsection{Gaussian Blur}
-\label{sec:org912c69e}
+\label{sec:org406bed6}
 
 
 \section{Experiments}
-\label{sec:org6960f6c}
+\label{sec:org8040e38}
 \subsection{Model Training}
-\label{sec:orgbb1fa6c}
+\label{sec:orga493bcd}
 Talk about all the changes made to the network
 
 To train the network, large quantities of high quality DEM data is required.
@@ -705,13 +731,13 @@ Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however the
 NAC DEMs were found to be of much higher quality at similar and greater resolutions.
 64 NAC DEMs\autocite{LROCRDRProduct} representing a variety of lunar terrain features were selected at random for the training set, with a further 32 selected for testing and validation purposes.
 \subsection{Model Testing Methodology}
-\label{sec:org64b91d2}
+\label{sec:orgc3830a6}
 
 
 Compare slope to no slope
 
 \section{Results}
-\label{sec:org846382b}
+\label{sec:orgfd1f6c5}
 
 \begin{figure}[htbp]
 \centering
@@ -727,13 +753,14 @@ AE loss is the spatially discounted reconstruction loss\autocite{zhangVoidFillin
 
 
 \section{Discussion}
-\label{sec:org2d16aa7}
+\label{sec:orgd71373b}
 
 \section{Conclusion}
-\label{sec:org6bfaed6}
+\label{sec:org916876d}
+Check if because the network is fully convolutional, can it be used on arbritrary sizes once trained
 
 \section{Future Work}
-\label{sec:orgbfd6c5f}
+\label{sec:org6fe4ae7}
 
 Uncertainty maps
 Maybe region normalisation?\autocite{yuRegionNormalizationImage2023}

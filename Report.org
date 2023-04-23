@@ -791,7 +791,31 @@ The effectiveness of spatially discounted reconstruction loss can be seen by com
 Both graphs show their respective losses over training, with the spatially discounted reconstruction loss accurately showing convergence of the model around epoch 500 whilst the normal reconstruction loss has largely random values.
 This must be taken in context, the network was not trained to minimise the normal reconstruction loss, however it demonstrates that plausible infilled data would have been penalised if using normal reconstruction loss.
 
+*** Contextual Attention Layer
+The contextual attention layer learns to copy features from known non-void patches into likely regions within a void, first described by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
+For the purposes of the contextual attention layer, the non-void area is referred to as the background and the void area the foreground.
+Patches are extracted from the background of size 3x3, and then reshaped as convolutional filters.
+These background patches $\left\{ b_{x^{\prime}, y^{\prime}} \right\}$ are matched with foreground ones $\left\{ f_{x,y} \right\}$ to copy features to by measuring with normalised inner product:
+\begin{equation}
+s_{x,y,x^\prime,y^\prime} = \left \langle \frac{f_{x,y}}{\Vert f_{x,y} \Vert}, \frac{b_{x^\prime,y^\prime}}{\Vert b_{x^\prime,y^\prime} \Vert} \right \rangle
+\end{equation}
+Where $s_{x,y,x^\prime,y^\prime}$ represents the similarity of feature matching between a patch centered in foreground $(x,y)$ and background $(x^\prime, y^\prime)$.
+
+The attention score of each background block can be calculated with $s^*_{x,y,x^\prime,y^\prime} = softmax_{x^\prime, y^\prime} \left( \lambda s_{x,y,x^\prime,y^\prime} \right)$, where $\lambda$ is a constant value.
+The optimal block $\left \{ b_{x^\prime, y^\prime} \right\}$ is selected, and used as convolution filters to reconstruct foregrounds during deconvolution.
+Values of overlapping pixels are averaged.
+It can be inferred that matched patches will likely be coherent, meaning that a change in a background block will likely correspond to an equal change in a foreground block.
+To help maintain the overall consistency of the infilled DEM, a left-right propagation is done, followed by a top-down propagation to get a new attention score for matched blocks.
+For example, the equation for the left-right propagation for kernel size $k$ is as follows:
+\begin{equation}
+\hat{s}_{x,y,x^\prime,y^\prime} = \sum_{i \in \{-k,\dots,k\}} s^*_{x,y,x^\prime,y^\prime}
+\end{equation}
+
+*Change CAL background section!*
+
 ** Unified Inpainting Network
+
+Contextual attention layer works thanks to the coarse network, so patches from the coarse network can be matched to patches of the background.
 
 ** Data Post-processing
 *** Poisson Blending
@@ -911,6 +935,7 @@ plt.show()
 * Discussion
 
 * Conclusion
+Check if because the network is fully convolutional, can it be used on arbritrary sizes once trained
 
 * Future Work
 
