@@ -150,6 +150,7 @@ t = tiled[0][tile_n]
 t = t.cpu().detach().numpy()
 t = np.transpose(t, (1, 2, 0))
 
+
 plt.figure(figsize=(8,10))
 plt.subplot(1,2,1)
 plt.imshow(t[:,:,0], cmap='terrain')
@@ -189,7 +190,6 @@ Older missions (pre 2011) are typically archived in PDS3, with post 2011 mission
 Although stored differently, the raster data in PDS files and GeoTiffs is identical.
 
 The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically constructed using remote sensing technology which is prone to the same errors.
-
 
 ** Deep Neural Networks
 
@@ -402,7 +402,6 @@ This concept is inspired by human attention, people selectively attend to specif
 As the layer is differentiable it can be trained, improving the efficiency of the network as a whole.
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs; by matching background regions to copy from the network does not have to hallucinate entirely novel data, with the resulting inpainting result being more cohesive with the rest of the image.
 
-
 ** Related Work
 
 /A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps/ by Park and Choi[cite:@parkNeuralProcessApproach2021] is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
@@ -470,8 +469,6 @@ A binary matrix $M = (m_p) \in 0,1^{m \times n}$ acts as a mask representing the
 We refer to pixels $p$ for which $m_p = 1$ as /known/, and /unknown/ otherwise.
 
 *Problem*: Given an initial partial elevation model $D^0$, slope of the elevation model $S^0$, construct a complete elevation model $D$ with semantically plausible generated values for the masked regions.
-
-
 
 ** Data Pre-Processing
 
@@ -578,7 +575,6 @@ The NumPy array is then converted to a PyTorch tensor, however this is computati
 
 A threading pool was originally implemented to increase the speed of pre-processing, as most of work is handled by external C libraries which are not limited by the fact that only one python thread can execute bytecode at a time.
 Despite success in reducing loading times, the issue of pre-processing memory usage became considerably worse and longer load times were judged to be preferable over higher memory usage.
-
 
 ** Deep Generational Model
 
@@ -743,7 +739,6 @@ Yu /et al./ implemented this with multiplication of gradients and input mask $M$
 Where the mask value is 0 for missing pixels and 1 for elsewhere.
 $\lambda$ was set to 10 for the training of the network.
 
-
 *** Spatially Discounted Reconstruction Loss
 
 Pixel-wise $l_1$ reconstruction loss calculates the absolute difference between the original and reconstructed DEM.
@@ -797,7 +792,6 @@ The effectiveness of spatially discounted reconstruction loss can be seen by com
 Both graphs show their respective losses over training, with the spatially discounted reconstruction loss accurately showing convergence of the model around epoch 500 whilst the normal reconstruction loss has largely random values.
 This must be taken in context, the network was not trained to minimise the normal reconstruction loss, however it demonstrates that plausible infilled data would have been penalised if using normal reconstruction loss.
 
-
 *** Contextual Attention Layer
 
 The contextual attention layer learns to copy features from known non-void patches into likely regions within a void, first described by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
@@ -821,7 +815,6 @@ For example, the equation for the left-right propagation for kernel size $k$ is 
 
 The use of contextual attention is possible due to the coarse-to-fine architecture of the network (Figure [[fig:generator]]).
 This is because contextual attention requires matching patches in the foreground to the background, however if there was a single encoder-decoder, then there would be no patches in the foreground; the coarse prediction is used as an initial step to find likely matching background patches.
-
 
 *** Model Training
 
@@ -858,7 +851,6 @@ $n_{critic}$ was set to 5 for all training in this paper, as is usually the case
 
 \end{algorithm}
 
-
 ** Poisson Blending
 
 Although the network uses a global critic to encourage the network to not hallucinate non-masked values during reconstruction, the predicted DEM $x^\prime$ may differ slightly from the ground truth $x$ outside of masked regions.
@@ -876,38 +868,37 @@ Infilled voids in $x^\prime$ can be seamlessly pasted into ground truth $x$ by c
 \end{equation}
 Where $\tilde{x}$ is the final infilling result, $x^\prime_i$ equals $x_i$ at the non-void regions of the ground truth $x$, and $\nabla$ represents the gradient operator.
 
-#+CAPTION: Poisson Blending
 #+NAME:   fig:poisson
 \begin{figure}
 \centering
 \begin{subfigure}{0.4\textwidth}
-    \includegraphics[width=\textwidth]{images/unblended.png}
     \caption{Unblended}
+    \includegraphics[width=\textwidth]{images/unblended.png}
     \label{fig:unblended}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.4\textwidth}
+    \caption{Blended}
     \includegraphics[width=\textwidth]{images/blended.png}
-    \caption{blended}
     \label{fig:blended}
 \end{subfigure}
+\caption{Boundary region viewed close up}
 \end{figure}
 
+
 * Experiments
+
 ** Model Training
-Talk about all the changes made to the network
 
 To train the network, large quantities of high quality DEM data is required.
 Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
 NAC DEMs were found to be of much higher quality at similar and greater resolutions.
-64 NAC DEMs[cite:@LROCRDRProduct] representing a variety of lunar terrain features were selected at random for the training set, with a further 32 selected for testing and validation purposes.
-** Model Testing Methodology
+96 NAC DEMs[cite:@LROCRDRProduct] representing a variety of lunar terrain features were selected for the training set, with 64 randomly chosen for training and the remaining 32 for testing and validation purposes.
+A list of the DEMs used for training can be found at Appendix x.
 
+Using the data pre-processing steps, the (compressed) 64 training DEMs were tiled, slope calculated and then combined, resulting in a dataset of 175,808 256x256 DEM tiles, each of which containing elevation value and slope.
+To simulate both void regions and DEM joining tasks, two different kinds of random masks were used, with a 50% chance of being used in a batch.
 
-Compare slope to no slope
-
-
-* Results
 
 #+NAME: ae_loss
 #+begin_src jupyter-python :file images/ae_loss.png
@@ -956,6 +947,7 @@ plt.show()
 
 AE loss is the spatially discounted reconstruction loss[cite:@zhangVoidFillingBased2020]
 
+#+NAME: wasserstein_loss
 #+begin_src jupyter-python :file images/wasserstein_loss.png
 import matplotlib.pyplot as plt
 import numpy as np
@@ -997,9 +989,18 @@ plt.legend()
 plt.show()
 #+end_src
 
-#+RESULTS:
+#+CAPTION: Wasserstein Generator and Critic loss
+#+NAME: fig:wasserstein_loss
+#+RESULTS: wasserstein_loss
 [[file:images/wasserstein_loss.png]]
 
+** Model Testing Methodology
+
+
+Compare slope to no slope
+
+
+* Results
 
 * Discussion
 
