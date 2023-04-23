@@ -466,6 +466,7 @@ We refer to pixels $p$ for which $m_p = 1$ as /known/, and /unknown/ otherwise.
 *Problem*: Given an initial partial elevation model $D^0$, slope of the elevation model $S^0$, construct a complete elevation model $D$ with semantically plausible generated values for the masked regions.
 
 
+
 ** Data Pre-Processing
 
 *Need to add a graph of data pipeline*
@@ -510,7 +511,9 @@ As DEMs are raster data, each pixel in a square grid must have a stored value, e
 The data is tiled into 256x256 tiles for use in network training (Algorithm \ref{alg:tiling}), with tiles containing null values discarded before training begins.
 This is memory inefficient and increases the data loading time before training can begin, however the main issue became apparent when uploading for cloud training, as this unnecessary data increases upload time and in tern cost.
 To remedy this issue, each DEM file was compressed by initially tiling and discarding tiles containing null values, then saving back to a GeoTiff (Figure [[fig:compression]] (b)).
-The compressed file can only ever be tiled at the same size as when it was initially compressed, however this suited the requirements of this paper and reduced the size of the 64 DEMs from 12.4GB to 8.1GB.
+The compressed file can only ever be tiled at the same size as when it was initially compressed, however this suited the requirements of this paper and reduced the size of the training data from 12.4GB to 8.1GB.
+It is worth noting that this compression is lossy, any tile which contains even 1 null pixel is discarded.
+A more data efficient technique may be an optimisation algorithm, which attempts to fit the maximum number of tiles into the irregular shape of the DEM, however this would add significant computational complexity and there was more than enough DEM data available for training.
 
 \begin{algorithm}
 
@@ -579,7 +582,8 @@ The proposed DEM void infilling model is an adaptation of the image inpainting m
 This GAN architecture consists of a two-stage coarse to fine generator (Figure [[fig:generator]]) which increases the receptive fields of the convolutional layers and two critics (Figure [[fig:critic]]).
 The generator $G$ takes as input DEM elevation and slope with void pixels set equal to 1, and a binary mask to indicate the hole regions, outputting infilled elevation and slope values.
 Input data is of the size 256x256 and has a random rectangular void, sometimes splitting the entire DEM to simulate DEM joining tasks.
-The coarse network is trained explicitly with reconstruction loss, whereas the refinement network is trained with reconstruction plus two GAN losses, one critic judging the local loss of the inpainted area and a second the global loss of the entire infilled DEM;  enforcing consistency between infilled area and ground truth.
+The coarse network is trained explicitly with spatially discounted reconstruction loss, whereas the refinement network is trained with spatially discounted reconstruction loss plus two WGAN-GP losses, one critic judging the local loss of the inpainted area and a second the global loss of the entire infilled DEM;  enforcing consistency between infilled area and ground truth.
+As both WGAN-GP and spatially discounted pixel-wise reconstruction losses measure $l_1$ distances, the combined loss is more efficient and stable to train.
 The reconstruction losses reward the autoencoders for taking a DEM with voids and reconstructing it to infill the voids.
 As the coarse network takes as input the DEM with voids, it is much harder for it to learn to generate high level features, and so lower frequency data is generated.
 The power of the refinement network is the re-prediction of rough generated values, giving it a more complete scene which enables its encoder to learn better feature representation than the coarse network.
@@ -606,14 +610,6 @@ In addition, batch normalisation was implemented in the critic to add noise to e
 #+CAPTION: Checkerboard Artifacts
 #+NAME: fig:checkerboard
 [[file:images/checkerboard.png]]
-
-All of these changes resulted in a big improvement in the data output by the generator, however there were still some pattern artifacts appearing.
-Initially to attempt to resolve this batch normalisation was introduced to all layer of the generators, except the input and output layers.
-Yu /et al./ did not use batch normalisation in their model as it is expensive in terms of VRAM and they found it to deteriorate color coherence.
-As can be seen in Figure [[fig:bn_wloss]], batch normalisation lead to instability in the network, with the loss functions of the model showing no signs of decreasing whilst adding artifacts to the inpainted DEM.
-This may be because in adversarial settings, batch normalisation reduces the inter-class margin (separation of learned high-level features), which when applied to a DEM infilling network which relies on training for a high inter-class margin, leads to the observed instability[cite:@kongWhyDoesBatch2023].
-To address the issue of these artifacts, an additional layer was added to the end of both generators, using a tanh activation function and relatively large kernel sizes (table 1).
-Yu /et al./ used no activation functions in the final layer of their generators, using the Pytorch ~clip~ function to compress output weights to between -1 and 1, however using tanh introduces non-linearity to the final layer and the large kernel sizes of the additional final layers allow the generator to learn to remove any artifacts which it generates.
 
 #+NAME: bn_wloss
 #+begin_src jupyter-python :file images/bn_loss.png
@@ -649,6 +645,15 @@ plt.show()
 #+RESULTS: bn_wloss
 [[file:images/bn_loss.png]]
 
+All of these changes resulted in a big improvement in the data output by the generator, however there were still some pattern artifacts appearing.
+Initially to attempt to resolve this batch normalisation was introduced to all layer of the generators, except the input and output layers.
+Yu /et al./ did not use batch normalisation in their model as it is expensive in terms of VRAM and they found it to deteriorate color coherence.
+As can be seen in Figure [[fig:bn_wloss]], batch normalisation lead to instability in the network, with the loss functions of the model showing no signs of decreasing whilst adding artifacts to the inpainted DEM.
+This may be because in adversarial settings, batch normalisation reduces the inter-class margin (separation of learned high-level features), which when applied to a DEM infilling network which relies on training for a high inter-class margin, leads to the observed instability[cite:@kongWhyDoesBatch2023].
+To address the issue of these artifacts, an additional layer was added to the end of both generators, using a tanh activation function and relatively large kernel sizes (table 1).
+Yu /et al./ used no activation functions in the final layer of their generators, using the Pytorch ~clip~ function to compress output weights to between -1 and 1, however using tanh introduces non-linearity to the final layer and the large kernel sizes of the additional final layers allow the generator to learn to remove any artifacts which it generates.
+
+
 
 #+CAPTION: Details of network convolutions, (K)ernel, (S)tride, (C)hannels, (P)adding
 #+NAME: table:convolutions
@@ -678,7 +683,7 @@ plt.show()
 |    21 |                    | K7,S1,C2,P3        |                           |                      |
 
 
-*** Deep Generational Model Discriminant Loss
+*** Wasserstein GAN Gradient Penalty Loss
 
 A Wasserstein GAN uses the /Earth-Mover/ (EM) distance $W(\mathbb{P}_r \mathbb{P}_g)$, also known as the /Wasserstein-1/ distance instead of the KL divergence used by Goodfellow /et al./[cite:@goodfellowGenerativeAdversarialNetworks2020] in the initial GAN proposition.
 The EM distance for the real data distribution $\mathbb{P}_r$ and generated data distribution $\mathbb{P}_g$  is the minimum cost of transporting mass to convert $\mathbb{P}_r$ to $\mathbb{P}_g$.
@@ -733,30 +738,17 @@ Where the mask value is 0 for missing pixels and 1 for elsewhere.
 $\lambda$ was set to 10 for the training of the network.
 
 
-** Unified Inpainting Network
-** Data Post-processing
-*** Poisson Blending
-Due to the similarity with images, image processing techniques can be applied to the DEMs.
-In this paper, the technique of poisson seamless cloning[cite:@perezPoissonImageEditing2003] was used as a post processing step to remove any boundary between the infilled area and original DEM.
+*** Spatially Discounted Reconstruction Loss
 
-*** Gaussian Blur
+Pixel-wise $l_1$ reconstruction loss calculates the absolute difference between the original and reconstructed DEM.
+This is a useful metric by which to judge the accuracy of the reconstruction, however void infilling requires hallucinations of pixels and so there are likely feasible solutions that are quite different than the original DEM.
+When this happens, strong enforcement of the reconstruction loss in plausible patches differing from the original DEM may mislead the training process.
+Intuitively, hallucinated pixels that are close to the boundary of the void are much more likely to be similar to the original DEM than at the center of the void.
+Yu /et al./[cite:@yuGenerativeImageInpainting2018] introduced spatially discounted reconstruction loss which uses this intuition so as to not penalise the network for generating plausible but untruthful data.
+Using a weight mask $M$ to denote void regions, the weight of each pixel in the mask is computed as $\gamma^l$, with $l$ being equal to the distance of the pixel to the nearest known pixel.
+By using a value of $\gamma$ less than 1, the closer a pixel is to the center of a void, the less the weight its $l_1$ loss is given.
 
-
-* Experiments
-** Model Training
-Talk about all the changes made to the network
-
-To train the network, large quantities of high quality DEM data is required.
-Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
-NAC DEMs were found to be of much higher quality at similar and greater resolutions.
-64 NAC DEMs[cite:@LROCRDRProduct] representing a variety of lunar terrain features were selected at random for the training set, with a further 32 selected for testing and validation purposes.
-** Model Testing Methodology
-
-
-Compare slope to no slope
-
-* Results
-
+#+NAME: l1_loss
 #+begin_src jupyter-python :file images/l1_loss.png
 import matplotlib.pyplot as plt
 import numpy as np
@@ -790,9 +782,41 @@ plt.ylabel('L1 Loss')
 plt.show()
 #+end_src
 
-#+RESULTS:
+#+CAPTION: Normal reconstruction loss
+#+NAME: fig:l1_loss
+#+RESULTS: l1_loss
 [[file:images/l1_loss.png]]
 
+The effectiveness of spatially discounted reconstruction loss can be seen by comparing Figure [[fig:l1_loss]] and Figure [[fig:ae_loss]].
+Both graphs show their respective losses over training, with the spatially discounted reconstruction loss accurately showing convergence of the model around epoch 500 whilst the normal reconstruction loss has largely random values.
+This must be taken in context, the network was not trained to minimise the normal reconstruction loss, however it demonstrates that plausible infilled data would have been penalised if using normal reconstruction loss.
+
+** Unified Inpainting Network
+
+** Data Post-processing
+*** Poisson Blending
+Due to the similarity with images, image processing techniques can be applied to the DEMs.
+In this paper, the technique of poisson seamless cloning[cite:@perezPoissonImageEditing2003] was used as a post processing step to remove any boundary between the infilled area and original DEM.
+
+*** Gaussian Blur
+
+
+* Experiments
+** Model Training
+Talk about all the changes made to the network
+
+To train the network, large quantities of high quality DEM data is required.
+Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
+NAC DEMs were found to be of much higher quality at similar and greater resolutions.
+64 NAC DEMs[cite:@LROCRDRProduct] representing a variety of lunar terrain features were selected at random for the training set, with a further 32 selected for testing and validation purposes.
+** Model Testing Methodology
+
+
+Compare slope to no slope
+
+* Results
+
+#+NAME: ae_loss
 #+begin_src jupyter-python :file images/ae_loss.png
 import matplotlib.pyplot as plt
 import numpy as np
@@ -832,7 +856,9 @@ plt.ylabel('Autoencoder Loss')
 plt.show()
 #+end_src
 
-#+RESULTS:
+#+CAPTION: Spatially discounted reconstruction loss
+#+NAME: fig:ae_loss
+#+RESULTS: ae_loss
 [[file:images/ae_loss.png]]
 
 AE loss is the spatially discounted reconstruction loss[cite:@zhangVoidFillingBased2020]
