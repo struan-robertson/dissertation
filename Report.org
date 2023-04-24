@@ -850,10 +850,11 @@ $n_{critic}$ was set to 5 for all training in this paper, as is usually the case
 
 \end{algorithm}
 
+
 ** Poisson Blending
 
 Although the network uses a global critic to encourage the network to not hallucinate non-masked values during reconstruction, the predicted DEM $x^\prime$ may differ slightly from the ground truth $x$ outside of masked regions.
-As the infilled void regions of $x^\prime$ are pasted into the corrupted input DEM $z$ to create a complete DEM, these differences can result in a vertical deviation (Figure x).
+As the infilled void regions of $x^\prime$ are pasted into the corrupted input DEM $z$ to create a complete DEM, these differences can result in a vertical deviation (Figure [[fig:poisson]]).
 
 Poisson seamless cloning[cite:@perezPoissonImageEditing2003] blends the gradients of two images to remove a visible boundary whilst preserving the structure of the image.
 
@@ -867,6 +868,7 @@ Infilled voids in $x^\prime$ can be seamlessly pasted into ground truth $x$ by c
 \end{equation}
 Where $\tilde{x}$ is the final infilling result, $x^\prime_i$ equals $x_i$ at the non-void regions of the ground truth $x$, and $\nabla$ represents the gradient operator.
 
+#+CAPTION: Boundary region viewed close up
 #+NAME:   fig:poisson
 \begin{figure}
 \centering
@@ -877,11 +879,10 @@ Where $\tilde{x}$ is the final infilling result, $x^\prime_i$ equals $x_i$ at th
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.4\textwidth}
-    \caption{Blended}
+    \caption{Poison blended}
     \includegraphics[width=\textwidth]{images/blended.png}
     \label{fig:blended}
 \end{subfigure}
-\caption{Boundary region viewed close up}
 \end{figure}
 
 
@@ -896,8 +897,25 @@ NAC DEMs were found to be of much higher quality at similar and greater resoluti
 A list of the DEMs used for training can be found at Appendix x.
 
 Using the data pre-processing steps, the (compressed) 64 training DEMs were tiled, slope calculated and then combined, resulting in a dataset of 175,808 256x256 DEM tiles, each of which containing elevation value and slope.
-To simulate both void regions and DEM joining tasks, two different kinds of random masks were used, with a 50% chance of being used in a batch.
+To simulate both void regions and DEM joining tasks, two different types of random masks were used (Figure [[fig:masks]]), each with a 50% chance of being used in a batch.
+A random bounding box was created for every batch, with each DEM in the batch having a random mask within the bounds.
 
+#+CAPTION: Mask examples
+#+NAME:   fig:masks
+\begin{figure}
+\centering
+\begin{subfigure}{0.4\columnwidth}
+    \caption{Box mask}
+    \includegraphics[width=\linewidth]{images/box_mask.png}
+    \label{fig:box_mask}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.4\columnwidth}
+    \caption{Split mask}
+    \includegraphics[width=\linewidth]{images/split_mask.png}
+    \label{fig:blended}
+\end{subfigure}
+\end{figure}
 
 #+NAME: ae_loss
 #+begin_src jupyter-python :file images/ae_loss.png
@@ -944,7 +962,17 @@ plt.show()
 #+RESULTS: ae_loss
 [[file:images/ae_loss.png]]
 
-AE loss is the spatially discounted reconstruction loss[cite:@zhangVoidFillingBased2020]
+The network was trained for the first 40 epochs on a local Radeon 6750 XT GPU, then on a remote NVIDIA A100 80GB GPU with batch size 64.
+By initially starting off with a small batch size and then increasing, the network can mostly avoid the increased error rate of a large batch size whilst being able to train quickly[cite:@devarakondaAdaBatchAdaptiveBatch2018].
+This also allowed for rapid prototyping locally before an expensive cloud GPU was rented.
+
+The network was trained until it converged, which happened at epoch 500.
+Zhang /et al./[cite:@zhangVoidFillingBased2020] trained without slope using a very similar network architecture and had much more stable reconstruction loss, so it can be inferred that the addition of slope increases the difficulty of network training. *Replace when I have other log values sorted*
+This is expected, as on top of there being an extra channel for the generator to reconstruct, slope values have much more complex textures.
+The Wasserstein loss was much more stable, as can be seen in Figure [[fig:wasserstein_loss]].
+From 400 epochs onward the network began to converge, which can be observed in the steep decrease of reconstruction loss in Figure [[fig:ae_loss]] and the Wasserstein generator loss beginning to plateau in Figure [[fig:wasserstein_loss]].
+
+An additional model was also trained using only on elevation values, to allow for comparisons to judge the effect of training with slope values on the output of the network.
 
 #+NAME: wasserstein_loss
 #+begin_src jupyter-python :file images/wasserstein_loss.png
@@ -1001,7 +1029,9 @@ Compare slope to no slope
 
 * Results
 
+
 * Discussion
+
 
 * Conclusion
 Check if because the network is fully convolutional, can it be used on arbritrary sizes once trained
