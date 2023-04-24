@@ -1023,12 +1023,40 @@ plt.show()
 
 ** Model Testing Methodology
 
+The accuracy of the void filling results was evaluated by comparing the resulting data with the original DEM data.
+Several metric indexes, namely, mean error, standard deviation (SD), mean absolute error (MAE), and root-mean-square-error.
 
-Compare slope to no slope
+To assess the accuracy of the infilling network the infilled voids can be compared with the original DEM data.
+Qui /et al./[cite:@qiuVoidFillingDigital2019] proposed the use of the metrics mean absolute error (MAE), root-mean-square-error (RMSE) and the structural similarity index (SSIM)[cite:@wangImageQualityAssessment2004], with the difference of between standard deviations (SDD) also measured by this paper.
 
+The variables $x_i$ and $x^\prime_i$ represent the original dem and infilled result within the void area, respectively.
+Let $N$ be the number of void pixels within the DEM, $\mu_x$ equal to the mean error of $x$ and $\mu_{x^\prime}$ equal to the mean error of $x^\prime$.
+The metric indexes are calculated using the following equations:
+\begin{equation}
+SDD = \left\lvert \sqrt{ \frac{1}{N} \sum_{i=1}^N (x_i - \mu_x)^2 } \; \right\rvert - \left\lvert \sqrt{\frac{1}{N} \sum_{i=1}^N (x^\prime_i - \mu_{x^\prime})^2} \; \right\rvert
+\end{equation}
+
+\begin{equation}
+MAE = \frac{1}{N} \sum^N_{i=1} \vert(x_i - x^\prime_i )\vert,
+\end{equation}
+
+\begin{equation}
+RMSE = \sqrt{\frac{1}{N} \sum^N_{i=1} (x_i - x^\prime_i)^2},
+\end{equation}
+
+The above metric indexes are unable to judge the topographical texture as they are only statistical measures of the elevation error.
+As terrain texture must also be assessed jude the effect of training on slope data, SSIM is used to evaluate the structural similarity between the original DEM and the infilled result:
+
+Let $x$ and $y$ be the infilled data and the original DEM data; $\mu_x$ and $\mu_y$ be the mean of $x$ and $y$; $\sigma^2_x$ and $\sigma^2_x$ be the variance of $x$ and $y$; $\sigma_{xy}$ be the covariance of $x$ and $y$; $c_1 = (K_1L)^2$ and $c_2 = (K_2L)^2$; $K_1 = 0.01$, $K_2 = 0.03$; and $L$ be the dynamic range of pixel values.
+\begin{equation}
+\text{SSIM}(x,y) = \frac{(2\mu_x\mu_y + c_1)(2 \sigma_{xy} + c_1)}{(\mu^2_x + \mu^2_y + c_1) + (\sigma_x^2 + \sigma^2_y + c_2)}
+\end{equation}
+
+*Compare slope*
 
 * Results
 
+Void area ratio
 
 * Discussion
 
