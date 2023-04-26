@@ -1214,58 +1214,56 @@ The exception to this is split masks, which due to remaining the same width no m
 
 Although working on similar principles, infilling DEMs with GANS is more challenging than image inpainting for a number of reasons.
 High frequency DEM data, such as terrain texture information, is encoded in very small changes in elevation value, resulting in it being represented in the network as small differences in activation values that the network struggles to learn features from.
-This also has a detrimental effect on the effectiveness of loss functions at judging the quality of a generated DEM, the small differences in elevation value that represent terrain texture are not heavily penalised if wrong, and so whilst the network becomes highly accurate at infilling low-frequency elevation data such as craters, the infilling result is smooth.
+This is also detrimental to the effectiveness of loss functions at judging the quality of a generated DEM, the small differences in elevation value that represent terrain texture are not heavily penalised if wrong, and so whilst the network becomes highly accurate at infilling low-frequency elevation data, the infilling result is smooth.
 The inclusion of terrain slope encodes this high-frequency data much more explicitly, as the convolutional layers combine the slope and elevation channels it allows the network to learn patterns that are reflected in the output elevation values.
 
-The slope output of the network also serves as a useful tool to measure its ability to learn complex patterns; when viewed as an image instead of rendered in 3D subtle artifact in the elevation values may not be noticed, however it is much more apparent when viewing the slope (Figure x).
-
-The three challenges of reconstruction lunar no-data voids proposed by Park and Choi were:
- - NAC DEMs require high-resolution reconstruction methodology
- - NAC DEMs are large and high-resolution area maps, thus a scalable approach should be applied
- - The reconstruction algorithm must be reliable since it can affect related lunar studies or exploration missions.
+The slope output of the network also serves as a useful tool to measure its ability to learn complex patterns; when viewed as an image instead of rendered in 3D subtle artifact in the elevation values may not be noticed, however it is much more apparent when viewing the slope (Figure \ref{fig:box_training}).
 
 To pass the first challenge of lunar DEM void infilling proposed by Park and Choi[cite:@parkNeuralProcessApproach2021], the network must employ high-resolution reconstruction methodology.
-For this purpose, the network described in this paper was trained on high resolution NAC DEMs, which after testing proved to reconstruct voids with highly plausible low and high frequency data (Table).
-The /No Slope/ model served as a baseline from which to judge the architecture of the network, proving that it is highly effective at DEM infilling even when trained only on elevation data, however the /Slope/ model has shown that by training a void infilling GAN also on slope values, it can provide the network by encoding data on the overall terrain structure.
+For this purpose, the network described in this paper was trained on high resolution NAC DEMs, which after testing proved to reconstruct voids with highly plausible low and high frequency data (Table [[table:random_terrain]]).
+The /No Slope/ model served as a baseline from which to judge the architecture of the network, proving that it is highly effective at DEM infilling even when trained only on elevation data.
+By training on slope values, the /Slope/ model has proved that the accuracy of a void infilling GAN can be significantly improved, simply by including slope data as a channel in the network input and without modifications to network architecture.
+
 Whilst the use of slope improved the ability of the model to generate plausible high frequency terrain texture, the /No Slope/ model performed surprisingly well at this.
 This can likely be attributed to the contextual attention (CA) layer, as it learns to copy terrain texture from matching non-void regions into the generated result.
-The intuition for why the inclusion of slope values improves the networks ability to generate terrain texture is that it compliments this process, through the use of slope the CA layer find better matching patches from which to copy data.
+The intuition for the improvement of network accuracy in terms of terrain texture when slope is included is that it compliments this process, through the use of slope data the CA layer finds better matching patches from which to copy data.
 
-In the tests using the randomly sampled data, both networks performed similarly.
+In the tests using the randomly sampled terrain (Table [[table:random_terrain]]), the difference between networks was smaller than with the complex terrain (Table [[table:complex_terrain]]).
 This can be explained by the fact that a majority of this data is relatively gentle terrain, pocketed by small craters but without significant changes in elevation.
 For data like this, the slope value is often close to zero and encodes very little, therefor having very little impact on the effectiveness of the network.
-More complex terrain, such as the slope of a crater (Figure) is much more challenging for the network to infill even with elevation values, however the slope network performed significantly better.
-The CA layer extracts background data to copy in 3x3 patches, however for highly irregular terrain such as that shown in Figure x, these patches are likely not large enough to copy the texture in a plausible way.
-The main advantage of training using slope is that the texture is represented the same across the DEM no matter the elevation; a texture at the bottom of a crater would cause lower activation than a texture at the top, however as slope is a measure of the gradient of a pixel in relation to its neighbors it would have a uniform texture, which is much easier for the network to infer patterns from.
+More complex terrain, such as the slope of a crater (Figure \ref{fig:complex_terrain}) is much more challenging for the network to infill even with elevation values, however the slope network performed significantly better.
+The CA layer extracts background data to copy in 3x3 patches, however for highly irregular terrain such as that shown in Figure \ref{fig:complex_terrain}, these patches are likely not large enough to copy the texture in a plausible way.
+An advantage of training using slope is that the texture is represented the same across the DEM no matter the elevation; with elevation values a texture at the bottom of a crater would cause lower activation than the same texture at the top, however as slope is a measure of the gradient of a pixel in relation to its neighbors it would have a uniform texture, which is much easier for the network to infer patterns from.
 This allows a network trained on slope values to compensate for the ineffectiveness of the CA layer in highly complex terrain.
 The network being able to accurately infill complex terrain data makes it highly applicable to real world void infilling, as voids are caused by complex terrain features.
 
 As NAC dems are large and high resolution, the second challenge set forward by Park and Choi was for a solution to be scalable.
 With the network described in this paper there are two approaches to implement a scalable DEM void infilling solution.
 Firstly, as the network is fully convolutional a DEM of any size with a void of any size can be infilled.
-When tested however, this approach lead to unsatisfactory infilling results with high error, even if the void was the same size in a larger and smaller DEM.
+When tested however, this approach lead to unsatisfactory infilling results with high error (Table [[table:void_size]]), even if the void was the same size in a larger and smaller DEM.
 The reason for this is unclear, however there is a potential that it is simply a result of an issue with the testing, as due to the tiling algorithm discarding different null pixels depending on the size of tiles it is impossible to ensure that the same void is infilled for the small and larger DEM, even if it is the same size.
+
+*Maybe Delete*
 Visual inspection mostly aligned with table x, intuitively the larger a void region the less accurate an infilling result, however infilling normal sized voids in larger DEMs produced acceptable results (Figure x).
 
-The joining of larger DEMs scales very well if the task is simulated DEM joining, as can be seen in Figure x.
+The joining of larger DEMs scales very well if the task is simulated DEM joining, as can be seen in Figure \ref{fig:512_figure}.
 This is due to the fact that the void area scales linearly with the DEM size, remaining the same width throughout.
 Despite often a greater void area overall than a box mask, the proximity of known pixels results in the network more accurately hallucinating void data, the same principle as spatially discounted reconstruction loss.
-As filling lunar voids of a width and height greater than 160 pixels is likely to result in unsatisfactory results due to both the amount of hallucinated data and the distance from known pixels, this lack of scalability to very large voids does detract from the networks usefulness in real world void infilling tasks.
+As filling lunar voids of a width and height greater than 160 pixels is likely to result in unsatisfactory results due to both the amount of hallucinated data and the distance from known pixels, this lack of scalability to very large voids does not detract much from the networks usefulness in real world void infilling tasks.
 For the task of DEM joining however, scalability is more important as strips of DEM considerably longer than the data the network was trained on must be joined together.
 It is feasible that the network could successfully infill a much longer split between DEMs than 512, however this has not been tested.
 
-The other approach to scalability would be implementing a system similar to that proposed by Qui /et al./[cite:@qiuVoidFillingDigital2019], where the large DEM with voids to be infilled would be tiled into 256x256 tiles, input into the network and then infilled results concatenated.
+The other approach to scalability would be implementing a system similar to that proposed by Qui /et al./[cite:@qiuVoidFillingDigital2019], where a large DEM with voids to be infilled would be tiled into 256x256 tiles, input into the network and then the infilled results concatenated.
 For the application of the network described by this paper to real word void infilling tasks where a large DEM contains many smaller voids this would be the most appropriate.
 
 Reliability of the reconstruction algorithm was the final challenge that this paper set out to pass.
-While
-Unfortunately there is no method for testing if the network generated plausible data that was not accurate to the original DEM, however this is less of an issue for a DEM infilling than image inpainting, as generating data as close to the original DEM is very important for the data to be useful in a real world application.
-The low error rates in all metrics measured of the network clearly demonstrate that it is reliable, especially when compared to other void infilling GANs (table x).
+Unfortunately there is no method for testing if the network generated plausible data that was not accurate to the original DEM, however this is less of an issue for DEM infilling than image inpainting, as generating data highly accurate to the original DEM is very important for the data to be useful in a real world application.
+The low error rates in all metrics measured of the network clearly demonstrate that it is reliable, especially when compared to other void infilling GANs (Table [[table:random_terrain]]).
 A clear advantage of the network described by Park and Choi[cite:@parkNeuralProcessApproach2021] however is the ability to map the networks confidence of a generated pixel, in the network described in this paper there is no process for uncertainty analysis, which is a powerful tool if the data is to be used in future scientific missions.
-Whilst even without the inclusion of slope values the architecture described by this paper had low enough errors to be considered reliable on normal terrain, the inclusion of slope values significantly improved both the accuracy (MAE), number of artifacts (RMSE) and plausible reconstruction of the shape of terrain features.
+Even without the inclusion of slope values the architecture described by this paper had low enough errors to be considered reliable on regular terrain, and the inclusion of slope values significantly improved both the accuracy (MAE), number of artifacts (RMSE) and plausible reconstruction of the shape of terrain features.
 
 The usefulness of SSIM as a metric to measure the accuracy of a void infilling must be taken into question, due to its relative stability compared to all other metrics tested.
-This could be a result of the fact that even if a void infilling is inaccurate it is still structurally similar, however the improvement of SSIM compared to the steep worsening of other metrics when large voids in a 512x512 DEM were tested shows that it is not an accurate test of DEM accuracy or texture.
+This could be a result of the fact that even if a void infilling is inaccurate it is still structurally similar, however the improvement of SSIM compared to all other metrics becoming significantly worse when large voids in a 512x512 DEM were tested (Table [[table:void_size]]) shows that it is not an accurate test of DEM accuracy or texture.
 
 Overall it can be argued that the network described in this paper passes all three challenges set forward by Park and Choi, with it being especially effective at high resolution infilling, including high frequency terrain data.
 
