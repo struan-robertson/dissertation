@@ -1,6 +1,6 @@
-#+title: Terrain Model Processing with Machine Learning
+#+title: Lunar Terrain Void Infilling
 #+AUTHOR: Struan Robertson @@latex:\\@@ BSc (Hons) Applied Computing
-#+DATE: May 2023
+#+DATE: April 2023
 #+property: header-args :session paper :exports results :eval never-export
 #+BIBLIOGRAPHY: library.bib
 #+OPTIONS: toc:nil
@@ -1146,7 +1146,7 @@ Interestingly, the /No Slope/ model was more accurate in split mask infilling th
   \centering
   \includegraphics[width=\linewidth]{images/split_training.png}
   \captionsetup{justification=centering}
-  \caption{Split infilling results for elevation value (upper) and slope (lower). \\ Top: Masked Image, Middle: Infilling Result,  Bottom: Original DEM}
+  \caption{Split infilling results for elevation value (upper) and slope (lower), without Poisson blending. \\ Top: Masked Image, Middle: Infilling Result,  Bottom: Original DEM}
   \label{fig:split_training}
 \end{figure*}
 
@@ -1154,7 +1154,7 @@ Interestingly, the /No Slope/ model was more accurate in split mask infilling th
   \centering
   \includegraphics[width=\linewidth]{images/box_training.png}
   \captionsetup{justification=centering}
-  \caption{Box infilling results for elevation value (upper) and slope (lower). \\ Top: Masked Image, Middle: Infilling Result,  Bottom: Original DEM}
+  \caption{Box infilling results for elevation value (upper) and slope (lower), without Poisson blending. \\ Top: Masked Image, Middle: Infilling Result,  Bottom: Original DEM}
   \label{fig:box_training}
 \end{figure*}
 
@@ -1192,6 +1192,15 @@ The exception to this is split masks, which due to remaining the same width no m
 \label{fig:crater_artifact}
 \end{figure}
 
+* Discussion
+
+Although working on similar principles, infilling DEMs with GANs is more challenging than image inpainting for a number of reasons.
+High frequency DEM data, such as terrain texture information, is encoded in very small changes in elevation value, resulting in it being represented in the network as small differences in activation values that the network struggles to learn features from.
+This is also detrimental to the effectiveness of loss functions at judging the quality of a generated DEM, the small differences in elevation value that represent terrain texture are not heavily penalised if wrong, and so whilst the network becomes highly accurate at infilling low-frequency elevation data, the infilling result is smooth.
+The inclusion of terrain slope encodes this high-frequency data much more explicitly, as the convolutional layers combine the slope and elevation channels it allows the network to learn patterns that are reflected in the output elevation values.
+
+The slope output of the network also serves as a useful tool to measure its ability to learn complex patterns; when viewed as an image instead of rendered in 3D subtle artifact in the elevation values may not be noticed, however are much more apparent when viewing the slope (Figure \ref{fig:box_training}).
+
 \begin{figure}
 \centering
 \begin{subfigure}{1\columnwidth}
@@ -1208,16 +1217,6 @@ The exception to this is split masks, which due to remaining the same width no m
 \caption{Simulated DEM joining, viewed at an angle}
 \label{fig:simulated_joining}
 \end{figure}
-
-
-* Discussion
-
-Although working on similar principles, infilling DEMs with GANs is more challenging than image inpainting for a number of reasons.
-High frequency DEM data, such as terrain texture information, is encoded in very small changes in elevation value, resulting in it being represented in the network as small differences in activation values that the network struggles to learn features from.
-This is also detrimental to the effectiveness of loss functions at judging the quality of a generated DEM, the small differences in elevation value that represent terrain texture are not heavily penalised if wrong, and so whilst the network becomes highly accurate at infilling low-frequency elevation data, the infilling result is smooth.
-The inclusion of terrain slope encodes this high-frequency data much more explicitly, as the convolutional layers combine the slope and elevation channels it allows the network to learn patterns that are reflected in the output elevation values.
-
-The slope output of the network also serves as a useful tool to measure its ability to learn complex patterns; when viewed as an image instead of rendered in 3D subtle artifact in the elevation values may not be noticed, however are much more apparent when viewing the slope (Figure \ref{fig:box_training}).
 
 To pass the first challenge of lunar DEM void infilling proposed by Park and Choi[cite:@parkNeuralProcessApproach2021], the network must employ high-resolution reconstruction methodology.
 For this purpose, the network described in this paper was trained on high resolution NAC DEMs, which after testing proved to reconstruct voids with highly plausible low and high frequency data (Table [[table:random_terrain]]).
@@ -1262,12 +1261,21 @@ Even without the inclusion of slope values the architecture described by this pa
 The usefulness of SSIM as a metric to measure the accuracy of void infilling must be taken into question, due to its relative stability compared to all other metrics tested.
 This could be a result of the fact that even if a void infilling is inaccurate it is still structurally similar, however the improvement of SSIM compared to all other metrics becoming significantly worse when large voids in a 512x512 DEM were tested (Table [[table:void_size]]) shows that it is not an accurate test of DEM accuracy or texture.
 
-* Conclusion
-Check if because the network is fully convolutional, can it be used on arbritrary sizes once trained
-It is, so change related work section
-
-
 Overall it can be argued that the network described in this paper passes all three challenges set forward by Park and Choi, with it being especially effective at high resolution infilling, including high frequency terrain data.
+
+* Conclusion
+
+This paper presents a method based on the algorithm of deep learning to repair no-data voids in terrain digital elevation models.
+The proposed method adapts the existing methodology of using deep convolutional wasserstein GANs for image inpainting to this task.
+In addition to elevation information, the network was trained with slope values as an additional input channel, encoding terrain information so that the network can infer greater patterns from it.
+
+Experiments were conducted on both randomly sampled terrain and terrain selected manually for complexity, creating test data sets which provide a general representation of the lunar surface and difficult edge cases respectively.
+These experiments served to test the accuracy of the network architecture at void infilling tasks, and to evaluate the effect of training with slope values.
+When trained with slope values, the network described in this paper had consistently low rates of error, resulting in the network performing considerably better at complex terrain infilling than a comparative network trained without slope.
+The visual results presented in this paper also demonstrate the networks ability to infill high frequency terrain texture.
+
+Testing has demonstrated that the method proposed by this paper is accurate when infilling voids in high resolution DEMs, scalable to larger DEMs in specific use cases and reliably generates terrain data which adheres to the overall terrain structure. Whilst this paper focused on the application of this method to the task of lunar void infilling, it would be equally applicable to the task of infilling voids of any DEM.
+
 
 * Future Work
 
