@@ -1279,18 +1279,18 @@ Testing has demonstrated that the method proposed by this paper is accurate when
 
 * Future Work
 
-Uncertainty maps
-Maybe region normalisation?[cite:@yuRegionNormalizationImage2023]
-Terrain texture based SSIM loss function, possible with pytorch so could 100% be computed on GPU
-Train on multiple different sizes
+The use of uncertainty maps of the infilled DEM area, as proposed by Park and Choi[cite:@parkNeuralProcessApproach2021], results in generated data that is far more useful in real-world situations; it can be judged if an infilled region has low enough uncertainty for use.
+As the purpose of the network described in this paper is to assist in lunar void infilling and DEM joining, the addition of uncertainty analysis to the network would make it more effective at both tasks.
+
+To generalise to a greater number of sizes of input images, the network should be trained further for refinement, changing the image size after a set number of epochs. If the network was to be used to infill real-world DEM voids it should also be trained using masks that represent real voids more accurately, such as those used by Qui /et al/.[cite:@qiuVoidFillingDigital2019].
 
 #+LATEX: \section*{Acknowledgements}
 
-SSIM code
-Poisson blending code
-Pytorch implementation of contextual attention inpainting
-Iain
-3Blue1Brown
+I would like to thank my project supervisor Dr. Iain Martin for always providing great advice and assistance throughout the project.
 
-I maybe dont need to generate slope, just take it as input.
+The project also made use of publicly available code, namely the Poisson blending implementation by nima7920[cite:@nima7920Nima7920Imageblending2023], the SSIM code from Pranjal Datta[cite:@dattaSSIMPyTorch2023] and the PyTorch implementation of the network proposed by by Yu /et al./[cite:@yuGenerativeImageInpainting2018] by daa233[cite:@Daa233GenerativeinpaintingpytorchPyTorch], which served as the basis this project was built on top of.
+
 #+PRINT_BIBLIOGRAPHY:
+
+
+#+LATEX: \section*{Appendices}
