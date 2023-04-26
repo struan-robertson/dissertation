@@ -64,12 +64,14 @@
 
 #+LATEX: \begin{abstract}
 
-With the launch of the lunar orbiter laser altimeter (LOLA) on NASA's lunar reconnaissance orbiter (LRO), a large amount of high-resolution digital elevation maps (DEMs) have been constructed, providing a precise topographical model of the moons surface.
-These DEMs are prone to voids containing no data, making the map less reliable for scientific purposes and future moon missions.
-This paper uses a machine learning model to allow for the technique of image inpainting to be used with lunar DEMs.
+With the launch of NASAs lunar reconnaissance orbiter (LRO), a large amount of high-resolution digital elevation maps (DEMs) have been constructed from data captured by its narrow-angle cameras (NACs) and lunar orbiter laser altimeter (LOLA).
+These DEMs provide a precise topographical model of the lunar surface, however are prone to voids containing no data as a result of terrain features blocking the mapping of small regions.
+To resolve this issue, this paper uses a machine learning model to allow for the technique of image inpainting to be used with DEM infilling.
 Image inpainting uses pixel data from an image to generate missing data to fill a void.
-DEMs can be thought of mathematically as identical to a single channel (greyscale) image, a two-dimensional array with "pixel" values corresponding to height, and so the technique of image inpainting can be easily applied to DEMs.
-A Generative Adversarial Network (GAN) based on a fully convolutional architecture was used for the inpainting.
+DEMs are two dimensional arrays of height values which, when normalised are equivalent to single channel (greyscale) images, and so the technique of image inpainting can be easily applied to DEMs.
+A deep convolutional wasserstein generative adversarial network with contextual attention and gradient penalty was used for the DEM void infilling.
+Additionally the network was trained using the slope values of the training data, which encode terrain features to improve the accuracy of the network.
+The proposed method was evaluated on both randomly sampled lunar terrain and terrain manually selected for complexity, demonstrating the suggested approach successfully reconstructs no-data voids with high accuracy.
 
 
 #+LATEX: \end{abstract}
@@ -406,7 +408,7 @@ The fully-convolutional nature of the contextual attention layer results in it b
 
 ** Related Work
 
-/A Neural Process Approach for Probabilistic Reconstruction of No-Data Gaps in Lunar Digital Elevation Maps/ by Park and Choi[cite:@parkNeuralProcessApproach2021] is the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
+Park and Choi[cite:@parkNeuralProcessApproach2021] authored the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes[cite:@kimAttentiveNeuralProcesses2019]) to reduce complexity and prevent over-fitting.
 This works on a similar concept to the contextual attention layer proposed by Yu /et al./[cite:@yuGenerativeImageInpainting2018] and used in the current paper; training the network to identify regions in the input image that are more or less important for the infilling task.
 Due to being fully convolutional in nature, contextual attention layers are likely more effective at improving void infilling GANs, with strong inpainting results described by Yu /et al./
@@ -417,26 +419,26 @@ This produces uncertainty maps of infilled regions, which indicate how confident
 Whilst the network proposed in the current paper likely produces more accurate void infilling results than Park and Choi - due to the use of contextual attention and slope data - uncertainty maps make infilled data more useful in real life applications.
 In future work, uncertainty analysis could be implemented in the network described in this paper.
 
-/Void Filling of Digital Elevation Models With Deep Generative Models/ by Gavriil /et al./[cite:@gavriilVoidFillingDigital2019] shares a similar network architecture to the current paper, as both are based on the inpainting network described by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
+The network proposed by Gavriil /et al./[cite:@gavriilVoidFillingDigital2019] shares a similar architecture to the current paper, as both are based on the inpainting network described by Yu /et al./[cite:@yuGenerativeImageInpainting2018].
 In the latent space of both the coarse and fine generators Gavriil /et al./ added local feature extraction (LFE) layers for improved local feature aggregation.
 Not only do other papers dispute the effectiveness of this[cite:@zhangVoidFillingBased2020], LFE is designed to improve the networks efficiency with input data containing a high density of small objects at high resolution (50cm/pixel)[cite:@hamaguchiEffectiveUseDilated2018], which is not such a relevant issue on the lunar surface.
-In the current paper a technique is employed that is likely more effective in the context of lunar DEMs; small objects on the lunar surface such as boulders are highlighted to the network as the slope at the edges of the object is significantly greater than the surrounding terrain, and are not of a very high density.
+In the current paper a technique is employed that is likely more effective in the context of lunar DEMs; small objects on the lunar surface such as boulders and craters are highlighted to the network as the slope at the edges of the object is significantly greater than the surrounding terrain, and are not of a very high density.
 The use of LFE layers likely makes the network described by Gavriil /et al./ more effective at inpainting human structures such as cities, however the use of slope in the current paper is more suited for lunar DEMs.
 To tackle the issue of a visible boundary at the edge of the infilled void, Gavriil /et al./ implemented a custom algorithm which by solving for a best fitting paraboloid blended this region.
 Whilst this was an effective technique, it is unnecessarily complex when compared to the poisson blending[cite:@perezPoissonImageEditing2003] implemented by the current paper.
 
-In /DEM Void Filling Based on Context Attention Generation Model/ Zhang /et al./[cite:@zhangVoidFillingBased2020] makes the argument that the use of local feature extraction by Gavriil /et al./[cite:@gavriilVoidFillingDigital2019] has a negative impact on the networks ability to recover overall DEM semantic information.
+Zhang /et al./[cite:@zhangVoidFillingBased2020] make the argument that the use of local feature extraction by Gavriil /et al./[cite:@gavriilVoidFillingDigital2019] has a negative impact on the networks ability to recover overall DEM semantic information.
 Zhang /et al./ also based their network architecture on the inpainting GAN described by Yu /et al./[cite:@yuGenerativeImageInpainting2018], with the difference in opinion resulting in Zhang /et al./ using an un-modified version of the network.
 For void boundary post-processing,  Zhang /et al./ used bilateral filtering, however poisson blending is more appropriate as DEM gradient information is preserved, whereas bilateral filtering is a lossy smoothing algorithm and so important data may be lost in the process.
 The network also does not include the slope of the DEMs, so whilst it is built on the same network architecture as the current paper, it is likely less effective at preserving DEM texture.
 
-/Filling Voids in Elevation Models Using a Shadow-Constrained Convolutional Neural Network/ by Dong /et al./[cite:@dongFillingVoidsElevation2020] introduces an additional loss function to train the network to adhere to geometric constraints implied by cast shadows.
+Dong /et al./[cite:@dongFillingVoidsElevation2020] introduce an additional loss function to train their network to adhere to geometric constraints implied by cast shadows.
 This is achieved by extracting shadow maps from satellite imagery of the DEM location, which in combination with known sun directions are used to compute a shadow-based supervisory signal.
 Whilst this may be an effective technique on earth, the requirement of cast shadows on the Moon poses an issue, as half of the moon is in permanent darkness.
 The model described by Dong /et al./ is a convolutional encoder-decoder, not a GAN.
 GANs have been proven to solve the problem of insufficient data[cite:@nandhiniabiramiDeepCNNDeep2021], making them more suited for void infilling than CNNs.
 
-The terrain texture generation model (TTGM) described by Qiu /et al./ in /Void Filling of Digital Elevation Models with a Terrain Texture Learning Model Based on Generative Adversarial Networks/[cite:@qiuVoidFillingDigital2019] served as the inspiration for using slope data in the void infilling network described by the current paper.
+The terrain texture generation model (TTGM) described by Qiu /et al/.[cite:@qiuVoidFillingDigital2019] served as the inspiration for using slope data in the void infilling network described by the current paper.
 Elevation, terrain slope and relief degree (a measure of the maximum change in elevation in the 3x3 window around each pixel) composed the samples in the training set, allowing the network to learn more complex terrain texture than by just training on elevation.
 TTGM was tested using simulated voids of a realistic shape and was able to capture deep features of the DEM data and structural patterns, including texture.
 Whilst this was proven effective by Qiu /et al./, the current paper found that including relief degree was expensive in terms of computation and memory usage; for little improvement.
@@ -456,7 +458,9 @@ This technique could be applied to the network described in the current paper, a
 
 Gavriil /et al./, Zhang /et al./, Dong /et al./ and Qiu /et al./ all trained their respective networks on DEM data from the Earth.
 Whilst this means that the trained models would not be effective at lunar void infilling, lunar and earth DEM data is functionally the same and so the same network architecture could be used for lunar void infilling if trained on lunar DEMs.
-
+This paper adapts a modified version of the network architecture described by Zhang /et al./, adding additional convolutional layers to help mitigate artifacts hallucinated by the network.
+The use of terrain slope by Qui /et al./ was also adopted to encode terrain structural information such as texture more explicitly.
+Relief degree however was not used, as it was found to have little effect whilst being memory expensive.
 
 * Methodology
 
@@ -1192,6 +1196,7 @@ The exception to this is split masks, which due to remaining the same width no m
 \label{fig:crater_artifact}
 \end{figure}
 
+
 * Discussion
 
 Although working on similar principles, infilling DEMs with GANs is more challenging than image inpainting for a number of reasons.
@@ -1262,6 +1267,7 @@ The usefulness of SSIM as a metric to measure the accuracy of void infilling mus
 This could be a result of the fact that even if a void infilling is inaccurate it is still structurally similar, however the improvement of SSIM compared to all other metrics becoming significantly worse when large voids in a 512x512 DEM were tested (Table [[table:void_size]]) shows that it is not an accurate test of DEM accuracy or texture.
 
 Overall it can be argued that the network described in this paper passes all three challenges set forward by Park and Choi, with it being especially effective at high resolution infilling, including high frequency terrain data.
+
 
 * Conclusion
 
