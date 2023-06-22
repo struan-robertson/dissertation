@@ -478,8 +478,6 @@ We refer to pixels $p$ for which $m_p = 1$ as /known/, and /unknown/ otherwise.
 
 ** Data Pre-Processing
 
-*Need to add a graph of data pipeline*
-
 #+NAME: compression
 #+begin_src jupyter-python :file images/compression.png
 from osgeo import gdal
@@ -900,7 +898,7 @@ To train the network, large quantities of high quality DEM data is required.
 Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
 NAC DEMs were found to be of much higher quality at similar and greater resolutions.
 96 NAC DEMs[cite:@LROCRDRProduct] representing a variety of lunar terrain features were selected for the training set, with 64 randomly chosen for training and the remaining 32 for testing and validation purposes.
-A list of the DEMs used for training can be found at Appendix x.
+A list of the DEMs used for training can be found at Appendix 6.
 
 Using the data pre-processing steps, the (compressed) 64 training DEMs were tiled, slope calculated and then combined, resulting in a dataset of 32,961 256x256 DEM tiles, each of which containing elevation value and slope.
 To simulate both void regions and DEM joining tasks, two different types of random masks were used (Figure [[fig:masks]]), each with a 50% chance of being used in a batch.
@@ -973,7 +971,7 @@ By initially starting off with a small batch size and then increasing, the netwo
 This also allowed for rapid prototyping locally before an expensive cloud GPU was rented.
 
 The network was trained until it converged, which happened at epoch 500.
-Zhang /et al./[cite:@zhangVoidFillingBased2020] trained without slope using a very similar network architecture and had much more stable reconstruction loss, so it can be inferred that the addition of slope increases the difficulty of network training. *Replace when I have other log values sorted*
+Zhang /et al./[cite:@zhangVoidFillingBased2020] trained without slope using a very similar network architecture and had much more stable reconstruction loss, so it can be inferred that the addition of slope increases the difficulty of network training.
 This is expected, as on top of there being an extra channel for the generator to reconstruct, slope values have much more complex textures.
 The Wasserstein loss was much more stable, as can be seen in Figure [[fig:wasserstein_loss]].
 From 400 epochs onward the network began to converge, which can be observed in the steep decrease of reconstruction loss in Figure [[fig:ae_loss]] and the Wasserstein generator loss beginning to plateau in Figure [[fig:wasserstein_loss]].
@@ -1026,8 +1024,6 @@ plt.show()
 #+NAME: fig:wasserstein_loss
 #+RESULTS: wasserstein_loss
 [[file:images/wasserstein_loss.png]]
-
-*Compare slope vs non slope training*
 
 ** Model Testing Methodology
 
@@ -1120,7 +1116,7 @@ Even when allowing for a large margin of error, both networks using the architec
 
 The terrain tested in Table [[table:random_terrain]] was randomly sampled from all NAC DEMs available, so as to provide an accurate representation of much of the lunar surface.
 When tested on this data the /Slope/ model performed better than the /No Slope/ model, with a significant improvement in box mask infilling and a lesser improvement when infilling split masks.
-A greater difference can be found when the models are tested on data manually selected for complex terrain features (Appendix x),  where the same pattern repeats (Table [[table:complex_terrain]]).
+A greater difference can be found when the models are tested on data manually selected for complex terrain features (Appendix 4),  where the same pattern repeats (Table [[table:complex_terrain]]).
 
 MAE gives equal weight to all errors, whereas RMSE gives more weight to larger errors.
 This makes MAE a better judge of the overall accuracy of the infilling, while RMSE is a good indicator of the number of artifacts in the generated data.
@@ -1300,3 +1296,14 @@ The project also made use of publicly available code, namely the Poisson blendin
 
 
 #+LATEX: \section*{Appendices}
+
+All code for this project can be found in the following github repository [[https://github.com/struan-robertson/DEM-Void-Infilling.]]
+
+The accompanying appendix contains:
+ - [1] Meeting notes with project supervisor
+ - [2] Training logs of No Slope model
+ - [3] Training logs of Slope model
+ - [4] List of NAC DEMs used in complex terrain testing data
+ - [5] List of randomly selected NAC DEMs used for testing data
+ - [6] List of DEMs used for training
+ - [7] Mid term report.

@@ -1,4 +1,4 @@
-% Created 2023-04-26 Wed 16:34
+% Created 2023-06-22 Thu 22:27
 % Intended LaTeX compiler: pdflatex
 \documentclass[twocolumn]{article}
 \usepackage[utf8]{inputenc}
@@ -82,7 +82,7 @@ The proposed method was evaluated on both randomly sampled lunar terrain and ter
 \end{abstract}
 
 \section{Introduction}
-\label{sec:org5dfec34}
+\label{sec:org129ff1e}
 
 Sensory data from the Lunar Orbiter Laser Altimeter (LOLA) and Lunar Reconnaissance Orbiter Camera (LROC) has been used for the construction of Lunar digital elevation models (DEMs) since the launch of the Lunar Reconnaissance Orbiter (LRO) in 2009.
 LRO has several primary objectives as part of a series of robotic missions that aim to pave the way for a permanent human presence on the Moon, including determining the global topography of the lunar surface at meter-scale resolution.
@@ -115,10 +115,10 @@ The final challenge of DEM reliability may be passed by this network, however th
 
 
 \section{Background}
-\label{sec:orgbd02a34}
+\label{sec:orgb0b6b8f}
 
 \subsection{Digital Elevation Maps}
-\label{sec:org7b59fe6}
+\label{sec:org96990fe}
 
 Digital elevation maps (DEMs) are digital representations of terrain elevation (Figure \ref{fig:apollo_17}).
 A DEM consists of a grid of cells, where each cell represents a specific area of terrain and contains the elevation value of the ground at this location.
@@ -164,7 +164,7 @@ The issue of no-data voids is not limited to lunar DEMs, as DEMs are typically c
 Whilst this paper applies the techniques and model it describes to the task of void infilling lunar DEMs, it is not limited to this field and would be just as applicable in other DEMs.
 
 \subsection{Deep Neural Networks}
-\label{sec:org2a0c4ea}
+\label{sec:orgc7bf443}
 
 Neural networks are a type of machine learning algorithm that is loosely modeled after the structure and function of biological brains, consisting of multiple artificial neurons\autocite{grossiIntroductionArtificialNeural2008}.
 A neuron can hold any value, however in most neural networks this value is restricted between 0 and 1 or -1 and 1.
@@ -275,7 +275,7 @@ Finally calculate the layers output \(\hat{Z^{(i)}}\) by applying a linear trans
 \(\gamma\) adjusts the standard deviation and \(\beta\) adjusts the bias, shifting the curve to the right or left side.\autocite{huberBatchNormalizationLevels2022}
 
 \subsubsection{Convolutional Neural Networks}
-\label{sec:orgcf71d57}
+\label{sec:orgc4587ee}
 
 \begin{figure}[htbp]
 \centering
@@ -327,7 +327,7 @@ By swapping the decoder from one autoencoder into another, the autoencoder encod
 
 
 \subsubsection{Generative Adversarial Networks}
-\label{sec:org9e8eb1c}
+\label{sec:org5fc9c27}
 Generative adversarial networks (GANs)\autocite{goodfellowGenerativeAdversarialNetworks2020} are a machine learning framework based on game theory.
 They are constructed from two opposing networks, a generator and a discriminator.
 The generator learns to generate fake data and attempts to trick the discriminator, which learns to distinguish between real and fake samples.
@@ -368,7 +368,7 @@ As the layer is differentiable it can be trained, improving the efficiency of th
 The fully-convolutional nature of the contextual attention layer results in it being highly effective in image inpainting GANs; by matching background regions to copy from the network does not have to hallucinate entirely novel data, with the resulting inpainting result being more cohesive with the rest of the image.
 
 \subsection{Related Work}
-\label{sec:org5525817}
+\label{sec:orge80af3f}
 
 Park and Choi\autocite{parkNeuralProcessApproach2021} authored the most relevant work to this paper, as it also attempts to solve the issue of lunar DEM void reconstruction.
 They use a sparse attentive neural processes (SANPs) (a novel implementation of attentive neural processes\autocite{kimAttentiveNeuralProcesses2019}) to reduce complexity and prevent over-fitting.
@@ -425,10 +425,10 @@ The use of terrain slope by Qui \emph{et al.} was also adopted to encode terrain
 Relief degree however was not used, as it was found to have little effect whilst being memory expensive.
 
 \section{Methodology}
-\label{sec:org58f2cc8}
+\label{sec:org516a158}
 
 \subsection{Problem Formation and Notation}
-\label{sec:orgb67e18e}
+\label{sec:orga05e7f0}
 
 Due to the similar nature of the problem being solved, the problem notation has been adapted from Gavriil \emph{et al.}\autocite{gavriilVoidFillingDigital2019}.
 DEMs in both GeoTiff, PDS3 and PDS4 will be considered, in all of which data forms a grid with a single height value for every position \((i, j)\).
@@ -441,9 +441,7 @@ We refer to pixels \(p\) for which \(m_p = 1\) as \emph{known}, and \emph{unknow
 \textbf{Problem}: Given an initial partial elevation model \(D^0\), slope of the elevation model \(S^0\), construct a complete elevation model \(D\) with semantically plausible generated values for the masked regions.
 
 \subsection{Data Pre-Processing}
-\label{sec:org015fe3f}
-
-\textbf{Need to add a graph of data pipeline}
+\label{sec:org0a61715}
 
 \begin{figure}[htbp]
 \centering
@@ -520,10 +518,10 @@ A threading pool was originally implemented to increase the speed of pre-process
 Despite success in reducing loading times, the issue of pre-processing memory usage became considerably worse and longer load times were judged to be preferable over higher memory usage.
 
 \subsection{Deep Generational Model}
-\label{sec:orgec184e0}
+\label{sec:org6d7ef84}
 
 \subsubsection{Deep Generational Model Structure}
-\label{sec:org20eb88e}
+\label{sec:org0d59678}
 
 The proposed DEM void infilling model is an adaptation of the image inpainting model proposed by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018}.
 This GAN architecture consists of a two-stage coarse to fine generator (Figure \ref{fig:generator}) which increases the receptive fields of the convolutional layers and two critics (Figure \ref{fig:critic}).
@@ -608,7 +606,7 @@ Layer & Coarse Generator & Fine Generator & Contextual Attention (CA) & Critics\
 \end{table*}
 
 \subsubsection{Wasserstein GAN Gradient Penalty Loss}
-\label{sec:org1e969e1}
+\label{sec:org628a761}
 
 A Wasserstein GAN uses the \emph{Earth-Mover} (EM) distance \(W(\mathbb{P}_r \mathbb{P}_g)\), also known as the \emph{Wasserstein-1} distance instead of the KL divergence used by Goodfellow \emph{et al.}\autocite{goodfellowGenerativeAdversarialNetworks2020} in the initial GAN proposition.
 The EM distance for the real data distribution \(\mathbb{P}_r\) and generated data distribution \(\mathbb{P}_g\)  is the minimum cost of transporting mass to convert \(\mathbb{P}_r\) to \(\mathbb{P}_g\).
@@ -664,7 +662,7 @@ Where the mask value is 0 for missing pixels and 1 for elsewhere.
 \(\lambda\) was set to 10 for the training of the network.
 
 \subsubsection{Spatially Discounted Reconstruction Loss}
-\label{sec:org4a890f4}
+\label{sec:org63885d0}
 
 Pixel-wise \(l_1\) reconstruction loss calculates the absolute difference between the original and reconstructed DEM.
 This is a useful metric by which to judge the accuracy of the reconstruction, however void infilling requires hallucinations of pixels and so there are likely feasible solutions that are quite different than the original DEM.
@@ -685,7 +683,7 @@ Both graphs show their respective losses over training, with the spatially disco
 This must be taken in context, the network was not trained to minimise the normal reconstruction loss, however it demonstrates that plausible infilled data would have been penalised if using normal reconstruction loss.
 
 \subsubsection{Contextual Attention Layer}
-\label{sec:orgbd2fd32}
+\label{sec:orge938bbd}
 
 The contextual attention layer learns to copy features from known non-void patches into likely regions within a void, first described by Yu \emph{et al.}\autocite{yuGenerativeImageInpainting2018}.
 For the purposes of the contextual attention layer, the non-void area is referred to as the background and the void area the foreground.
@@ -710,7 +708,7 @@ The use of contextual attention is possible due to the coarse-to-fine architectu
 This is because contextual attention requires matching patches in the foreground to the background, however if there was a single encoder-decoder, then there would be no patches in the foreground; the coarse prediction is used as an initial step to find likely matching background patches.
 
 \subsubsection{Model Training}
-\label{sec:orgf316f85}
+\label{sec:orgd868252}
 
 Sample a batch of DEMs denoted as \(x\) randomly from the training data.
 Random binary masks \(M\) are generated for each DEM in \(x\); with there being an equal chance that the masks are a normal rectangle or a rectangle which splits the DEM vertically.
@@ -746,7 +744,7 @@ This ensures that the critic provides a more accurate estimation of the Wasserst
 \end{algorithm}
 
 \subsection{Poisson Blending}
-\label{sec:org05366e6}
+\label{sec:org9bbd60e}
 
 Although the network uses a global critic to encourage the network to not hallucinate non-masked values during reconstruction, the predicted DEM \(x^\prime\) may differ slightly from the ground truth \(x\) outside of masked regions.
 As the infilled void regions of \(x^\prime\) are pasted into the corrupted input DEM \(z\) to create a complete DEM, these differences can result in a vertical deviation (Figure \ref{fig:poisson}).
@@ -781,17 +779,17 @@ Where \(\tilde{x}\) is the final infilling result, \(x^\prime_i\) equals \(x_i\)
 
 
 \section{Experiments}
-\label{sec:org4729f1d}
+\label{sec:org0fe806b}
 
 
 \subsection{Model Training}
-\label{sec:org030d7f5}
+\label{sec:org40e5916}
 
 To train the network, large quantities of high quality DEM data is required.
 Originally 5m/pixel LOLA DEMs of the lunar south pole were selected, however these featured an unacceptable quantity of artifacts.
 NAC DEMs were found to be of much higher quality at similar and greater resolutions.
 96 NAC DEMs\autocite{LROCRDRProduct} representing a variety of lunar terrain features were selected for the training set, with 64 randomly chosen for training and the remaining 32 for testing and validation purposes.
-A list of the DEMs used for training can be found at Appendix x.
+A list of the DEMs used for training can be found at Appendix 6.
 
 Using the data pre-processing steps, the (compressed) 64 training DEMs were tiled, slope calculated and then combined, resulting in a dataset of 32,961 256x256 DEM tiles, each of which containing elevation value and slope.
 To simulate both void regions and DEM joining tasks, two different types of random masks were used (Figure \ref{fig:masks}), each with a 50\% chance of being used in a batch.
@@ -824,7 +822,7 @@ By initially starting off with a small batch size and then increasing, the netwo
 This also allowed for rapid prototyping locally before an expensive cloud GPU was rented.
 
 The network was trained until it converged, which happened at epoch 500.
-Zhang \emph{et al.}\autocite{zhangVoidFillingBased2020} trained without slope using a very similar network architecture and had much more stable reconstruction loss, so it can be inferred that the addition of slope increases the difficulty of network training. \textbf{Replace when I have other log values sorted}
+Zhang \emph{et al.}\autocite{zhangVoidFillingBased2020} trained without slope using a very similar network architecture and had much more stable reconstruction loss, so it can be inferred that the addition of slope increases the difficulty of network training.
 This is expected, as on top of there being an extra channel for the generator to reconstruct, slope values have much more complex textures.
 The Wasserstein loss was much more stable, as can be seen in Figure \ref{fig:wasserstein_loss}.
 From 400 epochs onward the network began to converge, which can be observed in the steep decrease of reconstruction loss in Figure \ref{fig:ae_loss} and the Wasserstein generator loss beginning to plateau in Figure \ref{fig:wasserstein_loss}.
@@ -837,10 +835,8 @@ An additional model was also trained using only on elevation values, to allow fo
 \caption{\label{fig:wasserstein_loss}Wasserstein Generator and Critic loss}
 \end{figure}
 
-\textbf{Compare slope vs non slope training}
-
 \subsection{Model Testing Methodology}
-\label{sec:orgca8b364}
+\label{sec:org82c7f36}
 
 The accuracy of the void filling results was evaluated by comparing the resulting data with the original DEM data.
 Several metric indexes, namely, mean error, standard deviation (SD), mean absolute error (MAE), and root-mean-square-error.
@@ -877,7 +873,7 @@ SSIM is scaled from 0 to 1, with 1 being an identical image and 0 being a differ
 
 
 \section{Results}
-\label{sec:orge41b00e}
+\label{sec:orgb856d67}
 
 \begin{figure*}[p]
 \begin{subfigure}{1\columnwidth}
@@ -935,7 +931,7 @@ TTGM128 & - & - & 17.18 & 24.02 & 0.90\\[0pt]
 
 The terrain tested in Table \ref{table:random_terrain} was randomly sampled from all NAC DEMs available, so as to provide an accurate representation of much of the lunar surface.
 When tested on this data the \emph{Slope} model performed better than the \emph{No Slope} model, with a significant improvement in box mask infilling and a lesser improvement when infilling split masks.
-A greater difference can be found when the models are tested on data manually selected for complex terrain features (Appendix x),  where the same pattern repeats (Table \ref{table:complex_terrain}).
+A greater difference can be found when the models are tested on data manually selected for complex terrain features (Appendix 4),  where the same pattern repeats (Table \ref{table:complex_terrain}).
 
 MAE gives equal weight to all errors, whereas RMSE gives more weight to larger errors.
 This makes MAE a better judge of the overall accuracy of the infilling, while RMSE is a good indicator of the number of artifacts in the generated data.
@@ -1019,7 +1015,7 @@ DEM Size & Void & SDD & MAE & RMSE & SSIM\\[0pt]
 
 
 \section{Discussion}
-\label{sec:orgba063cf}
+\label{sec:org54e0bc8}
 
 Although working on similar principles, infilling DEMs with GANs is more challenging than image inpainting for a number of reasons.
 High frequency DEM data, such as terrain texture information, is encoded in very small changes in elevation value, resulting in it being represented in the network as small differences in activation values that the network struggles to learn features from.
@@ -1092,7 +1088,7 @@ Overall it can be argued that the network described in this paper passes all thr
 
 
 \section{Conclusion}
-\label{sec:org2be5177}
+\label{sec:org6f93edd}
 
 This paper presents a method based on the algorithm of deep learning to repair no-data voids in terrain digital elevation models.
 The proposed method adapts the existing methodology of using deep convolutional wasserstein GANs for image inpainting to this task.
@@ -1107,7 +1103,7 @@ Testing has demonstrated that the method proposed by this paper is accurate when
 
 
 \section{Future Work}
-\label{sec:orge4744f6}
+\label{sec:orgdceed34}
 
 The use of uncertainty maps of the infilled DEM area, as proposed by Park and Choi\autocite{parkNeuralProcessApproach2021}, results in generated data that is far more useful in real-world situations; it can be judged if an infilled region has low enough uncertainty for use.
 As the purpose of the network described in this paper is to assist in lunar void infilling and DEM joining, the addition of uncertainty analysis to the network would make it more effective at both tasks.
@@ -1124,4 +1120,17 @@ The project also made use of publicly available code, namely the Poisson blendin
 
 
 \section*{Appendices}
+
+All code for this project can be found in the following github repository \url{https://github.com/struan-robertson/DEM-Void-Infilling.}
+
+The accompanying appendix contains:
+\begin{itemize}
+\item\relax [1] Meeting notes with project supervisor
+\item\relax [2] Training logs of No Slope model
+\item\relax [3] Training logs of Slope model
+\item\relax [4] List of NAC DEMs used in complex terrain testing data
+\item\relax [5] List of randomly selected NAC DEMs used for testing data
+\item\relax [6] List of DEMs used for training
+\item\relax [7] Mid term report.
+\end{itemize}
 \end{document}
