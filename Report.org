@@ -1297,7 +1297,7 @@ The project also made use of publicly available code, namely the Poisson blendin
 
 #+LATEX: \section*{Appendices}
 
-All code for this project can be found in the following github repository [[https://github.com/struan-robertson/DEM-Void-Infilling.]]
+All code for this project can be found in the following github repository [[https://github.com/struan-robertson/DEM-Void-Infilling]].
 
 The accompanying appendix contains:
  - [1] Meeting notes with project supervisor
